@@ -20,12 +20,16 @@ void getCallLogs() async {
 int _selectedIndex = 0;
 
 class _MainScreenState extends State<MainScreen> {
+  late TextEditingController _yapilacakController;
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  var saat = "00:00";
+  String yapilacak = "";
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -65,7 +69,10 @@ class _MainScreenState extends State<MainScreen> {
             },
             foregroundColor: Colors.white,
             //splashColor: Colors.purple,
-            child: const Text("Tayfun"),
+            child: const Text(
+              "05395904016",
+              style: TextStyle(fontSize: 10),
+            ),
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
@@ -113,7 +120,113 @@ class _MainScreenState extends State<MainScreen> {
                                     color: Colors.black, fontSize: 20),
                               ),
                               dateControl(),
-                              IconButton(onPressed: () {}, icon: dateAdd())
+                              IconButton(
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Center(
+                                              child: Text(
+                                                "Randevu Oluştur",
+                                                style: TextStyle(
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              Column(
+                                                children: [
+                                                  Row(
+                                                    children: const [
+                                                      Text(
+                                                        "Kişi : ",
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                      Text("05395904016"),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text("Saat : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      SizedBox(
+                                                        width: 200,
+                                                        child: TextField(
+                                                          maxLines: 1,
+                                                          onChanged: (a) {
+                                                            setState(() {
+                                                              saat = a;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text(
+                                                          "Yapılacaklar : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      SizedBox(
+                                                        width: 200,
+                                                        child: TextField(
+                                                          maxLines: 1,
+                                                          onChanged: (a) {
+                                                            setState(() {
+                                                              yapilacak = a;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      const Icon(Icons.cut),
+                                                      TextButton(
+                                                        child: const Text(
+                                                            "Kaydet"),
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                                  const SnackBar(
+                                                            backgroundColor:
+                                                                Colors.blue,
+                                                            content: Text(
+                                                                "Randevu Alındı",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white)),
+                                                            duration: Duration(
+                                                                seconds: 1),
+                                                          ));
+                                                        },
+                                                      ),
+                                                      const Icon(
+                                                        Icons.cut,
+                                                      ),
+                                                    ],
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  icon: dateAdd())
                             ],
                           ),
                         ),
@@ -130,14 +243,80 @@ class _MainScreenState extends State<MainScreen> {
                       ListTile(
                         title: const Text("Tayfun Kaya"),
                         trailing: const Text("17:00"),
-                        subtitle: const Text("Saç + Sakal"),
-                        onTap: () {},
+                        subtitle: Text(yapilacak),
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(20.0)),
+                                  title: const Center(
+                                    child: Text(
+                                      "Randevu Ayarları",
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        TextButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text(
+                                              "Sil",
+                                              style:
+                                                  TextStyle(color: Colors.blue),
+                                            )),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Düzenle",
+                                              style: TextStyle(
+                                                  color: Colors.blue)),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
                         onLongPress: () {},
                       ),
                       const Divider()
                     ],
                   ),
                 )),
+    );
+  }
+
+  Column customerControl() {
+    return Column(
+      children: [
+        Row(
+          children: const [
+            Text("Şu an ki müşteriniz ", style: TextStyle(color: Colors.white)),
+            Text("Tayfun Kaya", style: TextStyle(color: Colors.red))
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              const Text("Yapılacaklar ",
+                  style: TextStyle(color: Colors.white)),
+              // ignore: unnecessary_string_interpolations
+              Text("$yapilacak", style: const TextStyle(color: Colors.red))
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -164,26 +343,4 @@ Text dateControl() {
     return const Text("Randevusuz",
         style: TextStyle(color: Colors.pink, fontSize: 20));
   }
-}
-
-Column customerControl() {
-  return Column(
-    children: [
-      Row(
-        children: const [
-          Text("Şu an ki müşteriniz ", style: TextStyle(color: Colors.white)),
-          Text("Tayfun Kaya", style: TextStyle(color: Colors.red))
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: const [
-            Text("Yapılacaklar ", style: TextStyle(color: Colors.white)),
-            Text("Saç + Sakal", style: TextStyle(color: Colors.red))
-          ],
-        ),
-      ),
-    ],
-  );
 }
