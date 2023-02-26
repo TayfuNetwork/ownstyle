@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ownstyle">
+    package="com.berber.ownstyle">
    <application
         android:label="ownstyle"
         android:name="${applicationName}"

@@ -1,4 +1,4 @@
-package com.example.ownstyle
+package com.berber.ownstyle
 
 import io.flutter.embedding.android.FlutterActivity
 

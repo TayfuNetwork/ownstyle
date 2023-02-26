@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ownstyle/MainScreen.dart';
+import 'package:ownstyle/sign_in_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,13 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'OwnStyle',
       theme: ThemeData(
-      
         primarySwatch: Colors.blue,
       ),
-      home: const MainScreen(),
+      home:  signInPage(),
     );
   }
 }
-
