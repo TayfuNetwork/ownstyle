@@ -1,9 +1,11 @@
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
-import 'package:ownstyle/UserInfo.dart';
+import 'package:ownstyle/Auth_Service.dart';
+import 'package:ownstyle/user.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final MyUser user;
+  MainScreen({super.key, required this.user});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -32,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   String yapilacak = "";
   @override
   Widget build(BuildContext context) {
+    String? isim = widget.user.isim;
     return SafeArea(
       child: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -83,7 +86,7 @@ class _MainScreenState extends State<MainScreen> {
             backgroundColor: Colors.blueAccent,
             title: Center(
               child: Text(
-                User().userName,
+                isim!,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
               ),

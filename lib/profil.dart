@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,16 +6,22 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ownstyle/MainScreen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import 'package:ownstyle/esnafAnaSayfa.dart';
 import 'package:ownstyle/servisler.dart';
+import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/user.dart';
+
 import 'Auth_Service.dart';
 
 // ignore: camel_case_types
 
 class Profile extends StatefulWidget {
-  const Profile({
+  String meslek;
+  Profile({
     Key? key,
+    required this.meslek,
   }) : super(key: key);
 
   @override
@@ -71,14 +78,14 @@ class _ProfileState extends State<Profile> {
                   /*************/ const SizedBox(height: 10),
                   TextField(
                     style: const TextStyle(color: Colors.white),
-                    maxLength: 11,
+                    maxLength: 20,
                     maxLines: 1,
-                    decoration: InputDecoration(
+                    decoration:const InputDecoration(
                       hintStyle: TextStyle(fontSize: 16.0, color: Colors.grey),
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blue, width: 1)),
                       focusColor: Colors.blue,
-                      hintText: 'Isim'.tr(),
+                      hintText: 'Isim',
                       enabled: true,
                     ),
                     autofocus: false,
@@ -86,49 +93,49 @@ class _ProfileState extends State<Profile> {
                       isim = girilenisim;
                     },
                   ),
-                  /*************/ const SizedBox(height: 10),
-
-                  /*************/ const SizedBox(height: 10),
-
-                  /*************/ const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Text(
-                        "Meslek:",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      DropdownButton<int>(
-                        iconEnabledColor: Colors.blue,
-                        dropdownColor: const Color.fromARGB(255, 28, 185, 242),
-                        style: const TextStyle(color: Colors.black),
-                        value: meslek?.x ?? 1,
-                        items: model1.meslekler.map((a) {
-                          return DropdownMenuItem(
-                            // ignore: sort_child_properties_last
-                            child: Text(a.meslek,
-                                style: const TextStyle(color: Colors.white)),
-                            value: a.x,
-                            onTap: () {
-                              setState(() {
-                                meslek = a;
-                              });
-                            },
-                          );
-                        }).toList(),
-                        onChanged: (s) {},
-                      ),
-                    ],
-                  ),
+                   const SizedBox(height: 30),
+                  widget.meslek != "esnaf"
+                      ? SizedBox()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            const Text(
+                              "Meslek:",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            DropdownButton<int>(
+                              iconEnabledColor: Colors.blue,
+                              dropdownColor:
+                                  const Color.fromARGB(255, 28, 185, 242),
+                              style: const TextStyle(color: Colors.black),
+                              value: meslek?.x ?? 1,
+                              items: model1.meslekler.map((a) {
+                                return DropdownMenuItem(
+                                  // ignore: sort_child_properties_last
+                                  child: Text(a.meslek,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                  value: a.x,
+                                  onTap: () {
+                                    setState(() {
+                                      meslek = a;
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                              onChanged: (s) {},
+                            ),
+                          ],
+                        ),
                   /*************/ Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      if (isim != null)
+                      if (isim != null || meslek != null)
                         ElevatedButton(
                           // ignore: prefer_const_constructors
 
                           onPressed: () async {
-                            if (isim!.length > 0) {
+                            if (isim!.isNotEmpty) {
                               setState(() {
                                 ad = isim!;
 
@@ -159,14 +166,18 @@ class _ProfileState extends State<Profile> {
                               await AuthService().updateUser(myUser);
 
                               myUser = MyUser(
+                                  musteri: false,
                                   isim: ad ?? "isimsiz",
                                   id: user.uid,
                                   meslek: (meslek)!.meslek,
                                   token: fcmToken);
                               await AuthService().updateUser(myUser);
-                              await Navigator.of(context).push(
-                                  CupertinoPageRoute(
-                                      builder: (context) => MainScreen()));
+                              if (AuthService().user!.musteri == false)
+                                // ignore: curly_braces_in_flow_control_structures, use_build_context_synchronously
+                                await Navigator.of(context).push(
+                                    CupertinoPageRoute(
+                                        builder: (context) =>
+                                            MainScreen(user: myUser)));
                               Navigator.of(context).pop();
                             } else {
                               Fluttertoast.showToast(
@@ -178,7 +189,7 @@ class _ProfileState extends State<Profile> {
                           },
                           child: Text('KaydetveDevamEt'.tr(),
                               style: TextStyle(color: Colors.white)),
-                        ),
+                        )
                     ],
                   )
                 ],
@@ -191,8 +202,11 @@ class _ProfileState extends State<Profile> {
   }
 
   Future _cikisYap() async {
-    FirebaseAuth.instance.signOut();
-    await Navigator.of(context)
-        .push(CupertinoPageRoute(builder: (context) => const MainScreen()));
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    await GoogleSignIn().disconnect();
+    await Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (context) => const signInPage()),
+        (route) => false);
   }
 }
