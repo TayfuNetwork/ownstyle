@@ -1,7 +1,8 @@
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:ownstyle/Auth_Service.dart';
-import 'package:ownstyle/user.dart';
+import 'package:ownstyle/user_model.dart';
+import 'package:phone_state/phone_state.dart';
 
 class MainScreen extends StatefulWidget {
   final MyUser user;
@@ -11,17 +12,45 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-void getCallLogs() async {
-  List<CallLogEntry> callLogs = [];
-  Iterable<CallLogEntry> entries = await CallLog.get();
-  entries.forEach((entry) {
-    callLogs.add(entry);
-  });
-}
-
 int _selectedIndex = 0;
 
 class _MainScreenState extends State<MainScreen> {
+  PhoneStateStatus status = PhoneStateStatus.NOTHING;
+  bool granted = false;
+
+  Iterable<CallLogEntry> _callLogEntries = [];
+  @override
+  void initState() {
+    _getCallLog();
+    setStream();
+  }
+
+  void setStream() {
+    PhoneState.phoneStateStream.listen((event) {
+      print("aaaaaaaaaaaaaaaaaaaa $event");
+
+      switch (event) {
+        case PhoneStateStatus.CALL_ENDED:
+        case PhoneStateStatus.NOTHING:
+          setState(() {
+            Future.delayed(Duration(seconds: 3), _getCallLog);
+          });
+          break;
+        case PhoneStateStatus.CALL_INCOMING:
+          break;
+        case PhoneStateStatus.CALL_STARTED:
+          break;
+      }
+    });
+  }
+
+  void _getCallLog() async {
+    var callLog = await CallLog.query();
+    setState(() {
+      _callLogEntries = callLog;
+    });
+  }
+
   late TextEditingController _yapilacakController;
 
   void _onItemTapped(int index) {
@@ -101,29 +130,24 @@ class _MainScreenState extends State<MainScreen> {
           ),
           body: _selectedIndex == 0
               ? Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.width,
+                  /* width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.width, */
                   color: Colors.white,
-                  child: Container(
-                    child: Column(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          child: Text("Son Aramalar"),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "05395904016",
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 20),
-                              ),
-                              dateControl(),
-                              IconButton(
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                        child: Text("Son Aramalar"),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _callLogEntries.length,
+                          itemBuilder: (context, index) {
+                            var callLogEntry = _callLogEntries.elementAt(index);
+                            return ListTile(
+                              leading: Icon(Icons.phone),
+                              title: Text(callLogEntry.number!),
+                              trailing: IconButton(
                                   onPressed: () {
                                     showDialog(
                                         context: context,
@@ -140,13 +164,14 @@ class _MainScreenState extends State<MainScreen> {
                                               Column(
                                                 children: [
                                                   Row(
-                                                    children: const [
-                                                      Text(
+                                                    children: [
+                                                      const Text(
                                                         "Kişi : ",
                                                         style: TextStyle(
                                                             color: Colors.blue),
                                                       ),
-                                                      Text("05395904016"),
+                                                      Text(
+                                                          callLogEntry.number!),
                                                     ],
                                                   ),
                                                   Row(
@@ -229,12 +254,13 @@ class _MainScreenState extends State<MainScreen> {
                                           );
                                         });
                                   },
-                                  icon: dateAdd())
-                            ],
-                          ),
+                                  icon: dateAdd()),
+                              subtitle: dateControl(),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 )
               : Container(
@@ -324,16 +350,20 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-Icon dateAdd() {
+dateAdd() {
   if (1 == 1) {
-    return const Icon(
-      Icons.add,
-      size: 34,
+    return GestureDetector(
+      child: const Icon(
+        Icons.add,
+        size: 34,
+      ),
     );
   } else {
-    return const Icon(
-      Icons.add,
-      size: 34,
+    return GestureDetector(
+      child: const Icon(
+        Icons.add,
+        size: 34,
+      ),
     );
   }
 }
@@ -341,9 +371,9 @@ Icon dateAdd() {
 Text dateControl() {
   if (1 == 1) {
     return const Text("Randevusuz",
-        style: TextStyle(color: Colors.pink, fontSize: 20));
+        style: TextStyle(color: Colors.pink, fontSize: 16));
   } else {
     return const Text("Randevusuz",
-        style: TextStyle(color: Colors.pink, fontSize: 20));
+        style: TextStyle(color: Colors.pink, fontSize: 16));
   }
 }

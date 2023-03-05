@@ -11,7 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ownstyle/esnafAnaSayfa.dart';
 import 'package:ownstyle/servisler.dart';
 import 'package:ownstyle/sign_in_page.dart';
-import 'package:ownstyle/user.dart';
+import 'package:ownstyle/user_model.dart';
 
 import 'Auth_Service.dart';
 
