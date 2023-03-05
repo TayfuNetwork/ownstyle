@@ -1,14 +1,24 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
+import 'package:ownstyle/randevu_model.dart';
+
 class MyUser {
   String? id;
   bool? musteri;
   bool? abone;
   String? meslek;
   String? isim;
-  int? no;
+  String? no;
   String? token;
+  List<MyDate>? randevu;
+  String? dateName;
+  DateTime? dateDate;
+  String? dateNo;
+  String? dateId;
+  String? dateYapilacak;
   MyUser({
     this.id,
     this.musteri,
@@ -17,6 +27,12 @@ class MyUser {
     this.isim,
     this.no,
     this.token,
+    this.randevu,
+    this.dateName,
+    this.dateDate,
+    this.dateNo,
+    this.dateId,
+    this.dateYapilacak,
   });
 
   MyUser copyWith({
@@ -25,8 +41,14 @@ class MyUser {
     bool? abone,
     String? meslek,
     String? isim,
-    int? no,
+    String? no,
     String? token,
+    List<MyDate>? randevu,
+    String? dateName,
+    DateTime? dateDate,
+    String? dateNo,
+    String? dateId,
+    String? dateYapilacak,
   }) {
     return MyUser(
       id: id ?? this.id,
@@ -36,6 +58,12 @@ class MyUser {
       isim: isim ?? this.isim,
       no: no ?? this.no,
       token: token ?? this.token,
+      randevu: randevu ?? this.randevu,
+      dateName: dateName ?? this.dateName,
+      dateDate: dateDate ?? this.dateDate,
+      dateNo: dateNo ?? this.dateNo,
+      dateId: dateId ?? this.dateId,
+      dateYapilacak: dateYapilacak ?? this.dateYapilacak,
     );
   }
 
@@ -48,6 +76,12 @@ class MyUser {
       'isim': isim,
       'no': no,
       'token': token,
+      'randevu': randevu?.map((x) => x.toMap()).toList(),
+      'dateName': dateName,
+      'dateDate': dateDate?.millisecondsSinceEpoch,
+      'dateNo': dateNo,
+      'dateId': dateId,
+      'dateYapilacak': dateYapilacak,
     };
   }
 
@@ -58,8 +92,14 @@ class MyUser {
       abone: map['abone'] != null ? map['abone'] as bool : null,
       meslek: map['meslek'] != null ? map['meslek'] as String : null,
       isim: map['isim'] != null ? map['isim'] as String : null,
-      no: map['no'] != null ? map['no'] as int : null,
+      no: map['no'] != null ? map['no'] as String : null,
       token: map['token'] != null ? map['token'] as String : null,
+      randevu: map['randevu'] != null ? List<MyDate>.from((map['randevu'] as List<int>).map<MyDate?>((x) => MyDate.fromMap(x as Map<String,dynamic>),),) : null,
+      dateName: map['dateName'] != null ? map['dateName'] as String : null,
+      dateDate: map['dateDate'] != null ? DateTime.fromMillisecondsSinceEpoch(map['dateDate'] as int) : null,
+      dateNo: map['dateNo'] != null ? map['dateNo'] as String : null,
+      dateId: map['dateId'] != null ? map['dateId'] as String : null,
+      dateYapilacak: map['dateYapilacak'] != null ? map['dateYapilacak'] as String : null,
     );
   }
 
@@ -69,7 +109,7 @@ class MyUser {
 
   @override
   String toString() {
-    return 'MyUser(id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token)';
+    return 'MyUser(id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token, randevu: $randevu, dateName: $dateName, dateDate: $dateDate, dateNo: $dateNo, dateId: $dateId, dateYapilacak: $dateYapilacak)';
   }
 
   @override
@@ -83,7 +123,13 @@ class MyUser {
       other.meslek == meslek &&
       other.isim == isim &&
       other.no == no &&
-      other.token == token;
+      other.token == token &&
+      listEquals(other.randevu, randevu) &&
+      other.dateName == dateName &&
+      other.dateDate == dateDate &&
+      other.dateNo == dateNo &&
+      other.dateId == dateId &&
+      other.dateYapilacak == dateYapilacak;
   }
 
   @override
@@ -94,6 +140,12 @@ class MyUser {
       meslek.hashCode ^
       isim.hashCode ^
       no.hashCode ^
-      token.hashCode;
+      token.hashCode ^
+      randevu.hashCode ^
+      dateName.hashCode ^
+      dateDate.hashCode ^
+      dateNo.hashCode ^
+      dateId.hashCode ^
+      dateYapilacak.hashCode;
   }
 }
