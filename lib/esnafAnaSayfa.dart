@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:call_log/call_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:ownstyle/Auth_Service.dart';
 import 'package:ownstyle/profil.dart';
@@ -64,6 +65,18 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null) {
+      setState(() {
+        saat = ('${pickedTime.hour}:${pickedTime.minute}');
+      });
+    }
   }
 
   var saat = "00:00";
@@ -148,6 +161,21 @@ class _MainScreenState extends State<MainScreen> {
                       itemCount: _callLogEntries.length,
                       itemBuilder: (context, index) {
                         var callLogEntry = _callLogEntries.elementAt(index);
+                        Text dateControl() {
+                          var a = callLogEntry.number.toString();
+                          List<String>? b = AuthService().user?.numaralar ?? [];
+                          if (b.contains(a)) {
+                            return const Text("Randevulu",
+                                style: TextStyle(
+                                    color: Colors.green, fontSize: 16));
+                          } else {
+                            return const Text("Randevusuz",
+                                style: TextStyle(
+                                    color: Colors.pink, fontSize: 16));
+                          }
+                        }
+
+                        ;
                         return ListTile(
                           leading: const Icon(Icons.phone),
                           title: Text(callLogEntry.name!.isEmpty
@@ -183,17 +211,12 @@ class _MainScreenState extends State<MainScreen> {
                                                   const Text("Saat : ",
                                                       style: TextStyle(
                                                           color: Colors.blue)),
-                                                  SizedBox(
-                                                    width: 200,
-                                                    child: TextField(
-                                                      maxLines: 1,
-                                                      onChanged: (a) {
-                                                        setState(() {
-                                                          saat = a;
-                                                        });
-                                                      },
-                                                    ),
-                                                  ),
+                                                  IconButton(
+                                                      icon: const Icon(
+                                                          Icons.access_time),
+                                                      onPressed: () {
+                                                        _selectTime(context);
+                                                      }),
                                                 ],
                                               ),
                                               Row(
@@ -226,6 +249,12 @@ class _MainScreenState extends State<MainScreen> {
                                                     onPressed: () async {
                                                       /************************************************/
                                                       Navigator.pop(context);
+                                                      AuthService()
+                                                          .user
+                                                          ?.numaralar
+                                                          ?.add(callLogEntry
+                                                              .number
+                                                              .toString());
 
                                                       await FirebaseFirestore
                                                           .instance
@@ -242,7 +271,8 @@ class _MainScreenState extends State<MainScreen> {
                                                         "no": callLogEntry
                                                             .number
                                                             .toString(),
-                                                        "saat": saat,
+                                                        "dateDate":
+                                                            saat.toString(),
                                                         "dateYapilacak":
                                                             yapilacak
                                                       });
