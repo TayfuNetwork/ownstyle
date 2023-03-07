@@ -79,6 +79,18 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<String> duzenle(var numara, String id) async {
+    String s = (await FirebaseFirestore.instance
+            .collection("Randevular")
+            .doc(id)
+            .collection("kim")
+            .doc(numara)
+            .get())
+        .data()!["dateDate"];
+
+    return s;
+  }
+
   var saat = "00:00";
   String yapilacak = "";
   @override
@@ -147,8 +159,8 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: _selectedIndex == 0
           ? Container(
-              /* width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.width, */
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               color: Colors.white,
               child: Column(
                 children: [
@@ -175,7 +187,6 @@ class _MainScreenState extends State<MainScreen> {
                           }
                         }
 
-                        ;
                         return ListTile(
                           leading: const Icon(Icons.phone),
                           title: Text(callLogEntry.name!.isEmpty
@@ -248,13 +259,15 @@ class _MainScreenState extends State<MainScreen> {
                                                     child: const Text("Kaydet"),
                                                     onPressed: () async {
                                                       /************************************************/
-                                                      Navigator.pop(context);
                                                       AuthService()
                                                           .user
-                                                          ?.numaralar
-                                                          ?.add(callLogEntry
-                                                              .number
-                                                              .toString());
+                                                          ?.numaralar!
+                                                          .add(callLogEntry
+                                                              .number!);
+
+                                                      AuthService().updateUser(
+                                                          AuthService().user!);
+                                                      Navigator.pop(context);
 
                                                       await FirebaseFirestore
                                                           .instance
@@ -274,7 +287,10 @@ class _MainScreenState extends State<MainScreen> {
                                                         "dateDate":
                                                             saat.toString(),
                                                         "dateYapilacak":
-                                                            yapilacak
+                                                            yapilacak,
+                                                        "dateName":
+                                                            callLogEntry.name ??
+                                                                null
                                                       });
 
                                                       /************************************************/
@@ -301,6 +317,8 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
           : Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               color: Colors.white,
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: SearchService2().searchStream1(),
@@ -325,23 +343,14 @@ class _MainScreenState extends State<MainScreen> {
                                       children: [
                                         SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
-                                          child: Text(
-                                            "${e.no}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
+                                          child: Text(e.dateName!.isEmpty
+                                              ? e.no!
+                                              : e.dateName!),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  leading: CircleAvatar(
-                                    child: Text(
-                                      e.dateDate.toString(),
-                                      style: const TextStyle(
-                                          fontSize: 20, color: Colors.white),
-                                    ),
-                                  ),
+                                  leading: CircleAvatar(child: Icon(Icons.cut)),
                                   subtitle: SingleChildScrollView(
                                     child: Text(
                                       "${e.dateYapilacak}",
@@ -349,12 +358,133 @@ class _MainScreenState extends State<MainScreen> {
                                           const TextStyle(color: Colors.blue),
                                     ),
                                   ),
+                                  trailing: Text(
+                                    e.dateDate.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 20, color: Colors.red),
+                                  ),
                                   onTap: () {
-                                    /* Navigator.of(context).push(CupertinoPageRoute(
-                                      builder: (context) => Sohbet(
-                                            currentUser: AuthService().user!,
-                                            konusulanUser: e,
-                                          ))); */
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Center(
+                                              child: Text(
+                                                "Randevu Düzenle",
+                                                style: TextStyle(
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      const Text(
+                                                        "Kişi : ",
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                      Text(e.no!),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text("Saat : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      IconButton(
+                                                          icon: const Icon(Icons
+                                                              .access_time),
+                                                          onPressed: () {
+                                                            _selectTime(
+                                                                context);
+                                                          }),
+                                                      Text(" ${(e.dateDate)}",
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .grey))
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text(
+                                                          "Yapılacaklar : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      SizedBox(
+                                                        width: 200,
+                                                        child: TextField(
+                                                          maxLines: 1,
+                                                          onChanged: (a) {
+                                                            setState(() {
+                                                              yapilacak = a;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      const Icon(Icons.cut),
+                                                      TextButton(
+                                                        child: const Text(
+                                                            "Kaydet"),
+                                                        onPressed: () async {
+                                                          /************************************************/
+                                                          AuthService()
+                                                              .user
+                                                              ?.numaralar!
+                                                              .add(e.no!);
+                                                          Navigator.pop(
+                                                              context);
+                                                          AuthService()
+                                                              .user
+                                                              ?.numaralar
+                                                              ?.add(e.no!);
+
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  "Randevular")
+                                                              .doc(
+                                                                  (AuthService()
+                                                                      .user!
+                                                                      .id))
+                                                              .collection("kim")
+                                                              .doc(e.no!
+                                                                  .toString())
+                                                              .set({
+                                                            "no":
+                                                                e.no.toString(),
+                                                            "dateDate":
+                                                                saat.toString(),
+                                                            "dateYapilacak":
+                                                                yapilacak
+                                                          });
+
+                                                          /************************************************/
+                                                        },
+                                                      ),
+                                                      const Icon(
+                                                        Icons.cut,
+                                                      ),
+                                                    ],
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        });
                                   },
                                 ),
                               );

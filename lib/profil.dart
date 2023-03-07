@@ -80,7 +80,7 @@ class _ProfileState extends State<Profile> {
                     style: const TextStyle(color: Colors.white),
                     maxLength: 20,
                     maxLines: 1,
-                    decoration:const InputDecoration(
+                    decoration: const InputDecoration(
                       hintStyle: TextStyle(fontSize: 16.0, color: Colors.grey),
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blue, width: 1)),
@@ -93,7 +93,7 @@ class _ProfileState extends State<Profile> {
                       isim = girilenisim;
                     },
                   ),
-                   const SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   widget.meslek != "esnaf"
                       ? SizedBox()
                       : Row(
@@ -151,6 +151,7 @@ class _ProfileState extends State<Profile> {
                                 isim: ad ?? "isimsiz",
                                 id: user.uid,
                                 meslek: (meslek)!.meslek,
+                                numaralar: [],
                               );
 
                               AuthService().user = MyUser();
@@ -170,7 +171,8 @@ class _ProfileState extends State<Profile> {
                                   isim: ad ?? "isimsiz",
                                   id: user.uid,
                                   meslek: (meslek)!.meslek,
-                                  token: fcmToken);
+                                  token: fcmToken,
+                                  numaralar: []);
                               await AuthService().updateUser(myUser);
                               if (AuthService().user!.musteri == false)
                                 // ignore: curly_braces_in_flow_control_structures, use_build_context_synchronously
