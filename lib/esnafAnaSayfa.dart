@@ -1,8 +1,12 @@
 import 'package:call_log/call_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ownstyle/Auth_Service.dart';
 import 'package:ownstyle/search_service.dart';
+import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 
@@ -129,6 +133,15 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        actions: <Widget>[
+          TextButton(
+            onPressed: _cikisYap,
+            child: Text(
+              'CikisYap',
+              style: TextStyle(color: (Colors.red)),
+            ),
+          )
+        ],
         toolbarHeight: 70,
         elevation: 0,
         backgroundColor: Colors.blueAccent,
@@ -666,6 +679,7 @@ class _MainScreenState extends State<MainScreen> {
           style: TextStyle(color: Colors.pink, fontSize: 16));
     }
   }
+
 /* showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -707,4 +721,12 @@ class _MainScreenState extends State<MainScreen> {
                                   ],
                                 );
                               }); */
+  Future _cikisYap() async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    await GoogleSignIn().disconnect();
+    await Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (context) => const signInPage()),
+        (route) => false);
+  }
 }

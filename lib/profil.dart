@@ -44,15 +44,7 @@ class _ProfileState extends State<Profile> {
           elevation: 0,
           backgroundColor: Colors.black12,
           title: Center(child: Text('Profil'.tr())),
-          actions: <Widget>[
-            /* TextButton(
-              onPressed: _cikisYap,
-              child: Text(
-                'CikisYap'.tr(),
-                style: TextStyle(color: (Colors.red)),
-              ),
-            ) */
-          ],
+          
         ),
         body: Container(
           decoration: const BoxDecoration(
@@ -203,12 +195,5 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Future _cikisYap() async {
-    await FirebaseAuth.instance.signOut();
-    await GoogleSignIn().signOut();
-    await GoogleSignIn().disconnect();
-    await Navigator.of(context).pushAndRemoveUntil(
-        CupertinoPageRoute(builder: (context) => const signInPage()),
-        (route) => false);
-  }
+  
 }
