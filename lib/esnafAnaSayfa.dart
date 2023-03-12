@@ -1,16 +1,10 @@
-import 'dart:convert';
-
 import 'package:call_log/call_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:ownstyle/Auth_Service.dart';
-import 'package:ownstyle/profil.dart';
-import 'package:ownstyle/randevu_model.dart';
 import 'package:ownstyle/search_service.dart';
 import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   final MyUser user;
@@ -27,6 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   bool granted = false;
 
   Iterable<CallLogEntry> _callLogEntries = [];
+
   @override
   void initState() {
     _getCallLog();
@@ -35,8 +30,6 @@ class _MainScreenState extends State<MainScreen> {
 
   void setStream() {
     PhoneState.phoneStateStream.listen((event) {
-      print("aaaaaaaaaaaaaaaaaaaa $event");
-
       switch (event) {
         case PhoneStateStatus.CALL_ENDED:
         case PhoneStateStatus.NOTHING:
@@ -79,19 +72,14 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<String> duzenle(var numara, String id) async {
-    String s = (await FirebaseFirestore.instance
-            .collection("Randevular")
-            .doc(id)
-            .collection("kim")
-            .doc(numara)
-            .get())
-        .data()!["dateDate"];
-
-    return s;
+  TimeOfDay randevusonuTimeOfDayTurunden() {
+    List<String> parts = saat.split(":");
+    TimeOfDay timeOfDay =
+        TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    return timeOfDay;
   }
 
-  var saat = "00:00";
+  String saat = "00:00";
   String yapilacak = "";
   @override
   Widget build(BuildContext context) {
@@ -194,118 +182,177 @@ class _MainScreenState extends State<MainScreen> {
                               : callLogEntry.name!),
                           trailing: IconButton(
                               onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Center(
-                                          child: Text(
-                                            "Randevu Oluştur",
-                                            style: TextStyle(color: Colors.red),
-                                          ),
-                                        ),
-                                        actions: <Widget>[
-                                          Column(
-                                            children: [
-                                              Row(
+                                var a = callLogEntry.number.toString();
+                                List<String>? b =
+                                    AuthService().user?.numaralar ?? [];
+                                !b.contains(a)
+                                    ? showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Center(
+                                              child: Text(
+                                                "Randevu Oluştur",
+                                                style: TextStyle(
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              Column(
                                                 children: [
-                                                  const Text(
-                                                    "Kişi : ",
-                                                    style: TextStyle(
-                                                        color: Colors.blue),
+                                                  Row(
+                                                    children: [
+                                                      const Text(
+                                                        "Kişi : ",
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                      Text(
+                                                          callLogEntry.number!),
+                                                    ],
                                                   ),
-                                                  Text(callLogEntry.number!),
+                                                  Row(
+                                                    children: [
+                                                      const Text("Saat : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      IconButton(
+                                                          icon: const Icon(Icons
+                                                              .access_time),
+                                                          onPressed: () {
+                                                            _selectTime(
+                                                                context);
+                                                          }),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text(
+                                                          "Yapılacaklar : ",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                      SizedBox(
+                                                        width: 200,
+                                                        child: TextField(
+                                                          maxLines: 1,
+                                                          onChanged: (a) {
+                                                            setState(() {
+                                                              yapilacak = a;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      const Icon(Icons.cut),
+                                                      TextButton(
+                                                        child: const Text(
+                                                            "Kaydet"),
+                                                        onPressed: () async {
+                                                          AuthService()
+                                                              .user
+                                                              ?.numaralar!
+                                                              .add(callLogEntry
+                                                                  .number!);
+
+                                                          AuthService()
+                                                              .updateUser(
+                                                                  AuthService()
+                                                                      .user!);
+
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  "Randevular")
+                                                              .doc(
+                                                                  (AuthService()
+                                                                      .user!
+                                                                      .id))
+                                                              .collection("kim")
+                                                              .doc(callLogEntry
+                                                                  .number
+                                                                  .toString())
+                                                              .set({
+                                                            "no": callLogEntry
+                                                                .number
+                                                                .toString(),
+                                                            "dateDate": saat,
+                                                            "dateYapilacak":
+                                                                yapilacak,
+                                                            "dateName":
+                                                                callLogEntry
+                                                                        .name ??
+                                                                    null
+                                                          });
+                                                          TimeOfDay
+                                                              currentTime =
+                                                              randevusonuTimeOfDayTurunden();
+                                                          int addedMinutes =
+                                                              20; // Eklenecek dakika sayısı
+
+                                                          int newMinutes =
+                                                              currentTime
+                                                                      .minute +
+                                                                  addedMinutes; // Dakikaya 20 ekleyin
+                                                          int newHours =
+                                                              currentTime.hour +
+                                                                  (newMinutes ~/
+                                                                      60); // Saatleri güncelleyin
+                                                          newMinutes = newMinutes %
+                                                              60; // Dakikaları güncelleyin
+
+                                                          TimeOfDay newTime =
+                                                              TimeOfDay(
+                                                                  hour:
+                                                                      newHours,
+                                                                  minute:
+                                                                      newMinutes);
+                                                          String timeString =
+                                                              newTime.format(
+                                                                  context);
+
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  "Users")
+                                                              .doc(
+                                                                  (AuthService()
+                                                                      .user!
+                                                                      .id))
+                                                              .update({
+                                                            "dateDate":
+                                                                timeString
+                                                                    .toString(),
+                                                          });
+                                                          /*       AuthService().updateUser(
+                                                          AuthService().user!); */
+                                                          // ignore: use_build_context_synchronously
+                                                          Navigator.pop(
+                                                              context);
+
+                                                          /************************************************/
+                                                        },
+                                                      ),
+                                                      const Icon(
+                                                        Icons.cut,
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
                                               ),
-                                              Row(
-                                                children: [
-                                                  const Text("Saat : ",
-                                                      style: TextStyle(
-                                                          color: Colors.blue)),
-                                                  IconButton(
-                                                      icon: const Icon(
-                                                          Icons.access_time),
-                                                      onPressed: () {
-                                                        _selectTime(context);
-                                                      }),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  const Text("Yapılacaklar : ",
-                                                      style: TextStyle(
-                                                          color: Colors.blue)),
-                                                  SizedBox(
-                                                    width: 200,
-                                                    child: TextField(
-                                                      maxLines: 1,
-                                                      onChanged: (a) {
-                                                        setState(() {
-                                                          yapilacak = a;
-                                                        });
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  const Icon(Icons.cut),
-                                                  TextButton(
-                                                    child: const Text("Kaydet"),
-                                                    onPressed: () async {
-                                                      /************************************************/
-                                                      AuthService()
-                                                          .user
-                                                          ?.numaralar!
-                                                          .add(callLogEntry
-                                                              .number!);
-
-                                                      AuthService().updateUser(
-                                                          AuthService().user!);
-                                                      Navigator.pop(context);
-
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection(
-                                                              "Randevular")
-                                                          .doc((AuthService()
-                                                              .user!
-                                                              .id))
-                                                          .collection("kim")
-                                                          .doc(callLogEntry
-                                                              .number
-                                                              .toString())
-                                                          .set({
-                                                        "no": callLogEntry
-                                                            .number
-                                                            .toString(),
-                                                        "dateDate":
-                                                            saat.toString(),
-                                                        "dateYapilacak":
-                                                            yapilacak,
-                                                        "dateName":
-                                                            callLogEntry.name ??
-                                                                null
-                                                      });
-
-                                                      /************************************************/
-                                                    },
-                                                  ),
-                                                  const Icon(
-                                                    Icons.cut,
-                                                  ),
-                                                ],
-                                              )
                                             ],
-                                          ),
-                                        ],
-                                      );
-                                    });
+                                          );
+                                        })
+                                    : null;
                               },
                               icon: dateAdd()),
                           subtitle: dateControl(),
@@ -385,7 +432,9 @@ class _MainScreenState extends State<MainScreen> {
                                                         style: TextStyle(
                                                             color: Colors.blue),
                                                       ),
-                                                      Text(e.no!),
+                                                      Text(e.dateName!.isEmpty
+                                                          ? e.no!
+                                                          : e.dateName!),
                                                     ],
                                                   ),
                                                   Row(
@@ -437,21 +486,82 @@ class _MainScreenState extends State<MainScreen> {
                                                     children: [
                                                       const Icon(Icons.cut),
                                                       TextButton(
+                                                          onPressed: () {
+                                                            FirebaseFirestore
+                                                                .instance
+                                                                .collection(
+                                                                    "Randevular")
+                                                                .doc(
+                                                                    "${AuthService().user!.id}")
+                                                                .collection(
+                                                                    "kim")
+                                                                .doc(e.no)
+                                                                .delete();
+                                                            AuthService()
+                                                                .user!
+                                                                .numaralar!
+                                                                .removeWhere(
+                                                                    (element) =>
+                                                                        element ==
+                                                                        e.no);
+
+                                                            AuthService()
+                                                                .updateUser(
+                                                                    AuthService()
+                                                                        .user!);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: const Text(
+                                                              "Sil")),
+                                                      TextButton(
                                                         child: const Text(
                                                             "Kaydet"),
                                                         onPressed: () async {
+                                                          TimeOfDay
+                                                              currentTime =
+                                                              randevusonuTimeOfDayTurunden();
+                                                          int addedMinutes =
+                                                              20; // Eklenecek dakika sayısı
+
+                                                          int newMinutes =
+                                                              currentTime
+                                                                      .minute +
+                                                                  addedMinutes; // Dakikaya 20 ekleyin
+                                                          int newHours =
+                                                              currentTime.hour +
+                                                                  (newMinutes ~/
+                                                                      60); // Saatleri güncelleyin
+                                                          newMinutes = newMinutes %
+                                                              60; // Dakikaları güncelleyin
+
+                                                          TimeOfDay newTime =
+                                                              TimeOfDay(
+                                                                  hour:
+                                                                      newHours,
+                                                                  minute:
+                                                                      newMinutes);
+                                                          String timeString =
+                                                              newTime.format(
+                                                                  context);
+
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  "Users")
+                                                              .doc(
+                                                                  (AuthService()
+                                                                      .user!
+                                                                      .id))
+                                                              .update({
+                                                            "dateDate":
+                                                                timeString
+                                                                    .toString(),
+                                                          });
                                                           /************************************************/
-                                                          AuthService()
-                                                              .user
-                                                              ?.numaralar!
-                                                              .add(e.no!);
+
                                                           Navigator.pop(
                                                               context);
-                                                          AuthService()
-                                                              .user
-                                                              ?.numaralar
-                                                              ?.add(e.no!);
-
                                                           await FirebaseFirestore
                                                               .instance
                                                               .collection(
@@ -464,12 +574,15 @@ class _MainScreenState extends State<MainScreen> {
                                                               .doc(e.no!
                                                                   .toString())
                                                               .set({
-                                                            "no":
-                                                                e.no.toString(),
                                                             "dateDate":
                                                                 saat.toString(),
                                                             "dateYapilacak":
-                                                                yapilacak
+                                                                yapilacak,
+                                                            "dateName":
+                                                                e.dateName ??
+                                                                    null,
+                                                            "no":
+                                                                e.no.toString()
                                                           });
 
                                                           /************************************************/
@@ -495,7 +608,7 @@ class _MainScreenState extends State<MainScreen> {
                     );
                   } else {
                     return const Center(
-                      child: Text("No Data"),
+                      child: Text("Randevu Yok"),
                     );
                   }
                 },
@@ -531,18 +644,16 @@ class _MainScreenState extends State<MainScreen> {
   dateAdd() {
     if (1 == 1) {
       return GestureDetector(
-        child: const Icon(
-          Icons.add,
-          size: 34,
-        ),
-      );
+          child: const Icon(
+        Icons.add,
+        size: 34,
+      ));
     } else {
       return GestureDetector(
-        child: const Icon(
-          Icons.add,
-          size: 34,
-        ),
-      );
+          child: const Icon(
+        Icons.add,
+        size: 34,
+      ));
     }
   }
 

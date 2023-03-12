@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:ownstyle/esnafAnaSayfa.dart';
 import 'package:ownstyle/servisler.dart';
 import 'package:ownstyle/sign_in_page.dart';
@@ -46,13 +45,13 @@ class _ProfileState extends State<Profile> {
           backgroundColor: Colors.black12,
           title: Center(child: Text('Profil'.tr())),
           actions: <Widget>[
-            TextButton(
+            /* TextButton(
               onPressed: _cikisYap,
               child: Text(
                 'CikisYap'.tr(),
                 style: TextStyle(color: (Colors.red)),
               ),
-            )
+            ) */
           ],
         ),
         body: Container(
@@ -148,11 +147,11 @@ class _ProfileState extends State<Profile> {
                               );
 
                               MyUser myUser = MyUser(
-                                isim: ad ?? "isimsiz",
-                                id: user.uid,
-                                meslek: (meslek)!.meslek,
-                                numaralar: [],
-                              );
+                                  isim: ad ?? "isimsiz",
+                                  id: user.uid,
+                                  meslek: (meslek)!.meslek,
+                                  numaralar: [],
+                                  dateDate: "");
 
                               AuthService().user = MyUser();
                               final fcmToken =
@@ -172,6 +171,7 @@ class _ProfileState extends State<Profile> {
                                   id: user.uid,
                                   meslek: (meslek)!.meslek,
                                   token: fcmToken,
+                                  dateDate: "",
                                   numaralar: []);
                               await AuthService().updateUser(myUser);
                               if (AuthService().user!.musteri == false)

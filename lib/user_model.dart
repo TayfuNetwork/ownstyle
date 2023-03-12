@@ -15,7 +15,7 @@ class MyUser {
   String? token;
   List<MyDate>? randevu;
   String? dateName;
-  String? dateDate;
+  String? dateDate = "";
   String? dateNo;
   String? dateId;
   String? dateYapilacak;
@@ -47,7 +47,7 @@ class MyUser {
     String? token,
     List<MyDate>? randevu,
     String? dateName,
-    String? dateDate,
+    String? dateDate = "",
     String? dateNo,
     String? dateId,
     String? dateYapilacak,
