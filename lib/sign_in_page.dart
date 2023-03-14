@@ -72,7 +72,7 @@ class _signInPageState extends State<signInPage> {
                           Navigator.of(context).pushAndRemoveUntil(
                               CupertinoPageRoute(
                                   builder: (context) =>
-                                      MainScreen(user: AuthService().user!)),
+                                      MainScreen()),
                               (route) => false);
                         }
                       },

@@ -171,7 +171,7 @@ class _ProfileState extends State<Profile> {
                                 await Navigator.of(context).push(
                                     CupertinoPageRoute(
                                         builder: (context) =>
-                                            MainScreen(user: myUser)));
+                                            MainScreen()));
                               Navigator.of(context).pop();
                             } else {
                               Fluttertoast.showToast(

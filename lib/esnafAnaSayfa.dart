@@ -11,8 +11,9 @@ import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 
 class MainScreen extends StatefulWidget {
-  final MyUser user;
-  MainScreen({super.key, required this.user});
+  MainScreen({
+    super.key,
+  });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -23,11 +24,13 @@ int _selectedIndex = 0;
 class _MainScreenState extends State<MainScreen> {
   PhoneStateStatus status = PhoneStateStatus.NOTHING;
   bool granted = false;
-
+  String? manuelNo;
+  String? manuelIsim;
   Iterable<CallLogEntry> _callLogEntries = [];
 
   @override
   void initState() {
+    AuthService().checkUser;
     _getCallLog();
     setStream();
   }
@@ -51,12 +54,15 @@ class _MainScreenState extends State<MainScreen> {
 
   void _getCallLog() async {
     var callLog = await CallLog.query();
+    Map<String, CallLogEntry> map = Map.fromEntries(
+      await callLog.map((p) => MapEntry(p.name ?? p.number!, p)),
+    );
+
+    List<CallLogEntry> uniquCallLogs = await map.values.toList();
     setState(() {
-      _callLogEntries = callLog;
+      _callLogEntries = uniquCallLogs;
     });
   }
-
-  late TextEditingController _yapilacakController;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -87,7 +93,7 @@ class _MainScreenState extends State<MainScreen> {
   String yapilacak = "";
   @override
   Widget build(BuildContext context) {
-    String? isim = widget.user.isim;
+    String? isim = AuthService().user!.isim;
     return SafeArea(
         child: Scaffold(
       bottomNavigationBar: BottomNavigationBar(
@@ -97,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Randevu Oluştur',
+            label: 'Ana Sayfa',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
@@ -108,30 +114,156 @@ class _MainScreenState extends State<MainScreen> {
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton.large(
-        backgroundColor: Colors.black,
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            backgroundColor: Colors.black,
-            content: Column(
-              children: [
-                const SizedBox(
-                  height: 400,
-                ),
-                customerControl()
-              ],
-            ),
-            duration: const Duration(seconds: 3),
-          ));
-        },
-        foregroundColor: Colors.white,
-        //splashColor: Colors.purple,
-        child: const Text(
-          "05395904016",
-          style: TextStyle(fontSize: 10),
-        ),
-      ),
+          backgroundColor: Color.fromARGB(255, 106, 81, 203),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Center(
+                      child: Text(
+                        "Randevu Oluştur",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    actions: <Widget>[
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                "No : ",
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                              SizedBox(
+                                width: 200,
+                                child: TextField(
+                                  maxLines: 1,
+                                  onChanged: (a) {
+                                    setState(() {
+                                      manuelNo = a;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "isim : ",
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                              SizedBox(
+                                width: 200,
+                                child: TextField(
+                                  maxLines: 1,
+                                  onChanged: (a) {
+                                    setState(() {
+                                      manuelIsim = a;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text("Saat : ",
+                                  style: TextStyle(color: Colors.blue)),
+                              IconButton(
+                                  icon: const Icon(Icons.access_time),
+                                  onPressed: () {
+                                    _selectTime(context);
+                                  }),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text("Yapılacaklar : ",
+                                  style: TextStyle(color: Colors.blue)),
+                              SizedBox(
+                                width: 200,
+                                child: TextField(
+                                  maxLines: 1,
+                                  onChanged: (a) {
+                                    setState(() {
+                                      yapilacak = a;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Icon(Icons.cut),
+                              TextButton(
+                                child: const Text("Kaydet"),
+                                onPressed: () async {
+                                  AuthService().user?.numaralar!.add(manuelNo!);
+
+                                  AuthService().updateUser(AuthService().user!);
+
+                                  await FirebaseFirestore.instance
+                                      .collection("Randevular")
+                                      .doc((AuthService().user!.id))
+                                      .collection("kim")
+                                      .doc(manuelNo.toString())
+                                      .set({
+                                    "no": manuelNo.toString(),
+                                    "dateDate": saat,
+                                    "dateYapilacak": yapilacak,
+                                    "dateName": manuelIsim ?? null
+                                  });
+                                  TimeOfDay currentTime =
+                                      randevusonuTimeOfDayTurunden();
+                                  int addedMinutes =
+                                      20; // Eklenecek dakika sayısı
+
+                                  int newMinutes = currentTime.minute +
+                                      addedMinutes; // Dakikaya 20 ekleyin
+                                  int newHours = currentTime.hour +
+                                      (newMinutes ~/
+                                          60); // Saatleri güncelleyin
+                                  newMinutes =
+                                      newMinutes % 60; // Dakikaları güncelleyin
+
+                                  TimeOfDay newTime = TimeOfDay(
+                                      hour: newHours, minute: newMinutes);
+                                  String timeString = newTime.format(context);
+
+                                  await FirebaseFirestore.instance
+                                      .collection("Users")
+                                      .doc((AuthService().user!.id))
+                                      .update({
+                                    "dateDate": timeString.toString(),
+                                  });
+                                  /*       AuthService().updateUser(
+                                                          AuthService().user!); */
+                                  // ignore: use_build_context_synchronously
+                                  Navigator.pop(context);
+
+                                  /************************************************/
+                                },
+                              ),
+                              const Icon(
+                                Icons.cut,
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  );
+                });
+          },
+          foregroundColor: Colors.white,
+          //splashColor: Colors.purple,
+          child: const Icon(Icons.cut)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      backgroundColor: Colors.transparent,
       appBar: AppBar(
         actions: <Widget>[
           TextButton(
@@ -185,6 +317,23 @@ class _MainScreenState extends State<MainScreen> {
                             return const Text("Randevusuz",
                                 style: TextStyle(
                                     color: Colors.pink, fontSize: 16));
+                          }
+                        }
+
+                        iconControl() {
+                          var a = callLogEntry.number.toString();
+                          List<String>? b = AuthService().user?.numaralar ?? [];
+                          if (b.contains(a)) {
+                            return const Icon(
+                              Icons.cut,
+                              color: Colors.green,
+                            );
+                          } else {
+                            return const Icon(
+                              Icons.add_alarm_sharp,
+                              size: 35,
+                              color: Colors.red,
+                            );
                           }
                         }
 
@@ -367,7 +516,7 @@ class _MainScreenState extends State<MainScreen> {
                                         })
                                     : null;
                               },
-                              icon: dateAdd()),
+                              icon: iconControl()),
                           subtitle: dateControl(),
                         );
                       },
@@ -654,22 +803,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  dateAdd() {
-    if (1 == 1) {
-      return GestureDetector(
-          child: const Icon(
-        Icons.add,
-        size: 34,
-      ));
-    } else {
-      return GestureDetector(
-          child: const Icon(
-        Icons.add,
-        size: 34,
-      ));
-    }
-  }
-
   Text dateControl() {
     if (1 == 1) {
       return const Text("Randevusuz",
@@ -680,47 +813,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-/* showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(20.0)),
-                                  title: const Center(
-                                    child: Text(
-                                      "Randevu Ayarları",
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        TextButton(
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text(
-                                              "Sil",
-                                              style:
-                                                  TextStyle(color: Colors.blue),
-                                            )),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Düzenle",
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              }); */
   Future _cikisYap() async {
     await FirebaseAuth.instance.signOut();
     await GoogleSignIn().signOut();

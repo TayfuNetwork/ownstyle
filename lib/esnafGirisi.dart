@@ -60,8 +60,7 @@ class _esnafGirisiState extends State<esnafGirisi> {
                       _googleGirisi();
                     } else {
                       Navigator.of(context).push(CupertinoPageRoute(
-                          builder: (context) =>
-                              MainScreen(user: AuthService().user!)));
+                          builder: (context) => MainScreen()));
                     }
                   },
                   child: Text("Giriş yap / Üye ol",
