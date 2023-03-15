@@ -9,6 +9,7 @@ import 'package:ownstyle/search_service.dart';
 import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({
@@ -89,6 +90,10 @@ class _MainScreenState extends State<MainScreen> {
     return timeOfDay;
   }
 
+  /*  void _sendSMS(String message, String recipents) async {
+    bool _result = await launchSms(message: message, number: recipents);
+  } */
+
   String saat = "00:00";
   String yapilacak = "";
   @override
@@ -114,7 +119,7 @@ class _MainScreenState extends State<MainScreen> {
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton.large(
-          backgroundColor: Color.fromARGB(255, 106, 81, 203),
+          backgroundColor: const Color.fromARGB(255, 106, 81, 203),
           onPressed: () {
             showDialog(
                 context: context,
@@ -241,8 +246,7 @@ class _MainScreenState extends State<MainScreen> {
                                       .update({
                                     "dateDate": timeString.toString(),
                                   });
-                                  /*       AuthService().updateUser(
-                                                          AuthService().user!); */
+
                                   // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
 
@@ -268,8 +272,8 @@ class _MainScreenState extends State<MainScreen> {
         actions: <Widget>[
           TextButton(
             onPressed: _cikisYap,
-            child: Text(
-              'CikisYap',
+            child: const Text(
+              'Cikis Yap',
               style: TextStyle(color: (Colors.red)),
             ),
           )
