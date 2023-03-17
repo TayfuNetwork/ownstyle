@@ -10,6 +10,9 @@ import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:flutter_sms/flutter_sms.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'main.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({
@@ -21,6 +24,29 @@ class MainScreen extends StatefulWidget {
 }
 
 int _selectedIndex = 0;
+@pragma('vm:entry-point')
+void callbackDispatcher() async {
+  Workmanager().executeTask((taskname, inputData) async {
+    switch (taskname) {
+      case simpleTaskKey:
+        bool _result = await launchSms(
+            message: inputData!['message'], number: inputData['numara']);
+        break;
+    }
+    return Future.value(true);
+  });
+}
+
+asd(number, data) async {
+  var uniqueId = DateTime.now().add(Duration(seconds: 5)).toString();
+  await Workmanager().registerOneOffTask(
+    uniqueId,
+    task,
+    initialDelay: const Duration(seconds: 10),
+    inputData: <String, String>{'message': data, 'numara': number},
+  );
+}
+
 
 class _MainScreenState extends State<MainScreen> {
   PhoneStateStatus status = PhoneStateStatus.NOTHING;
@@ -90,7 +116,7 @@ class _MainScreenState extends State<MainScreen> {
     return timeOfDay;
   }
 
-  /*  void _sendSMS(String message, String recipents) async {
+  /*   sendSMS(String message, String recipents) async {
     bool _result = await launchSms(message: message, number: recipents);
   } */
 
@@ -246,6 +272,7 @@ class _MainScreenState extends State<MainScreen> {
                                       .update({
                                     "dateDate": timeString.toString(),
                                   });
+                                  asd(manuelNo, 'bildirim geldi mi ?');
 
                                   // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
