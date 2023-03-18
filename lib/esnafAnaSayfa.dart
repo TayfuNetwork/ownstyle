@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ownstyle/Auth_Service.dart';
 import 'package:ownstyle/search_service.dart';
@@ -10,8 +11,8 @@ import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:flutter_sms/flutter_sms.dart';
-import 'package:workmanager/workmanager.dart';
 
+import 'NotificationService.dart';
 import 'main.dart';
 
 class MainScreen extends StatefulWidget {
@@ -24,29 +25,6 @@ class MainScreen extends StatefulWidget {
 }
 
 int _selectedIndex = 0;
-@pragma('vm:entry-point')
-void callbackDispatcher() async {
-  Workmanager().executeTask((taskname, inputData) async {
-    switch (taskname) {
-      case simpleTaskKey:
-        bool _result = await launchSms(
-            message: inputData!['message'], number: inputData['numara']);
-        break;
-    }
-    return Future.value(true);
-  });
-}
-
-asd(number, data) async {
-  var uniqueId = DateTime.now().add(Duration(seconds: 5)).toString();
-  await Workmanager().registerOneOffTask(
-    uniqueId,
-    task,
-    initialDelay: const Duration(seconds: 10),
-    inputData: <String, String>{'message': data, 'numara': number},
-  );
-}
-
 
 class _MainScreenState extends State<MainScreen> {
   PhoneStateStatus status = PhoneStateStatus.NOTHING;
@@ -272,7 +250,8 @@ class _MainScreenState extends State<MainScreen> {
                                       .update({
                                     "dateDate": timeString.toString(),
                                   });
-                                  asd(manuelNo, 'bildirim geldi mi ?');
+                                 await NotificationService().randevuZamanla("deneme mesajı", "05399305823", 1);
+                                  
 
                                   // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
