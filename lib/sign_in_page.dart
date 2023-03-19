@@ -71,8 +71,7 @@ class _signInPageState extends State<signInPage> {
                         } else {
                           Navigator.of(context).pushAndRemoveUntil(
                               CupertinoPageRoute(
-                                  builder: (context) =>
-                                      MainScreen()),
+                                  builder: (context) => MainScreen()),
                               (route) => false);
                         }
                       },
@@ -102,12 +101,16 @@ class _signInPageState extends State<signInPage> {
           User? _user = await sonuc.user;
           String a = "esnaf";
           await AuthService().checkUser();
-          return Navigator.of(context).pushAndRemoveUntil(
-              CupertinoPageRoute(
-                  builder: (context) => Profile(
-                        meslek: a,
-                      )),
-              ((route) => false));
+          AuthService().isHaveProfile
+              ? Navigator.of(context).pushAndRemoveUntil(
+                  CupertinoPageRoute(
+                      builder: (context) => Profile(
+                            meslek: a,
+                          )),
+                  ((route) => false))
+              : Navigator.of(context).pushAndRemoveUntil(
+                  CupertinoPageRoute(builder: (context) => MainScreen()),
+                  ((route) => false));
         }
       } on PlatformException catch (e) {
         Fluttertoast.showToast(

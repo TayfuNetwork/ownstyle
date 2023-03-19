@@ -24,6 +24,27 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+void randevuZamanla(String mesaj, String numara, int zaman, String name) async {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  final scheduledNotificationDateTime =
+      DateTime.now().add(Duration(minutes: zaman));
+  const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'your_channel_id', 'Scheduled Notification',
+      importance: Importance.max, priority: Priority.high);
+  const platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await flutterLocalNotificationsPlugin.schedule(
+      payload: "$mesaj,$numara",
+      0,
+      'Sıradaki Randevu',
+      "$name'a randevusunu hatırlatın !",
+      scheduledNotificationDateTime,
+      platformChannelSpecifics);
+}
+
 int _selectedIndex = 0;
 
 class _MainScreenState extends State<MainScreen> {
@@ -250,8 +271,11 @@ class _MainScreenState extends State<MainScreen> {
                                       .update({
                                     "dateDate": timeString.toString(),
                                   });
-                                 await NotificationService().randevuZamanla("deneme mesajı", "05399305823", 1);
-                                  
+                                  randevuZamanla(
+                                      "Sevgili $manuelIsim; ${AuthService().user!.isim} de ki randevunuza son 20 dakikanız kaldığını hatırlatmak isteriz. Bizi tercih ettiğiniz için teşekkür eder memnuniyet dileriz.",
+                                      "$manuelNo",
+                                      1,
+                                      "$manuelIsim");
 
                                   // ignore: use_build_context_synchronously
                                   Navigator.pop(context);

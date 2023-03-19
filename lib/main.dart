@@ -11,7 +11,6 @@ void main() async {
   await Firebase.initializeApp();
   await AuthService().checkUser();
   await NotificationService.init();
-  await NotificationService.showNotification();
   runApp(const MyApp());
 }
 

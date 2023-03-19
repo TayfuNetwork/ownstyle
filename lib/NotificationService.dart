@@ -6,6 +6,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
+    
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
 
@@ -22,7 +23,7 @@ class NotificationService {
         var numara = list[1];
         bool _result = await launchSms(message: mesaj, number: numara);
       },
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground
     );
   }
 
@@ -54,8 +55,8 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.schedule(
         payload: "$mesaj,$numara",
         0,
-        'Scheduled Notification',
-        'This is a scheduled notification!',
+        'Sıradaki Randevunuz',
+        'Sıradaki müşterinize randevusunu hatırlatın!',
         scheduledNotificationDateTime,
         platformChannelSpecifics);
   }
@@ -63,8 +64,8 @@ class NotificationService {
 }
 
 @pragma('vm:entry-point')
-Future<void> notificationTapBackground(NotificationResponse response) async {
-  var list = response.payload?.split(",");
+void notificationTapBackground(NotificationResponse notoficationResponse) async {
+  var list = notoficationResponse.payload?.split(",");
   var mesaj = list?[0] ?? "payload gelmedi";
   var numara = list?[1] ?? "05395904016";
   Future.delayed(Duration(seconds: 3), () async {

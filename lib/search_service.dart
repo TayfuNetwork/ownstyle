@@ -44,6 +44,6 @@ class SearchService2 {
           .collection("kim");
 
   Stream<QuerySnapshot<Map<String, dynamic>>> searchStream1() {
-    return userCollection.orderBy("dateDate", descending: false).snapshots();
+    return userCollection.orderBy("dateDate", descending: true).snapshots();
   }
 }
