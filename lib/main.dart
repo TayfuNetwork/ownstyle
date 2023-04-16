@@ -3,11 +3,32 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:ownstyle/Auth_Service.dart';
 import 'package:ownstyle/landing_page.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 import 'NotificationService.dart';
 
+GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+
+Future<void> checkForUpdate() async {
+  try {
+    AppUpdateInfo info = await InAppUpdate.checkForUpdate();
+    if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+      try {
+        await InAppUpdate.performImmediateUpdate();
+      } on Exception catch (e) {
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!)
+            .showSnackBar(SnackBar(content: Text("$e")));
+      }
+    }
+  } on Exception catch (e) {
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!)
+        .showSnackBar(SnackBar(content: Text("$e")));
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  checkForUpdate();
   await Firebase.initializeApp();
   await AuthService().checkUser();
   await NotificationService.init();

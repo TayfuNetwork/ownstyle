@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +25,7 @@ class AuthService {
 
   AuthService._();
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   CollectionReference<Map<String, dynamic>> get userCollection =>
       FirebaseFirestore.instance.collection("Users");
@@ -66,7 +68,9 @@ class AuthService {
 
 
   Future<bool> updateUserName(String userID, String yeniUserName) async {
+    // ignore: prefer_is_empty
     if (yeniUserName.length < 0) {
+      // ignore: no_leading_underscores_for_local_identifiers
       var _users = await FirebaseFirestore.instance
           .collection("Users")
           .where("isim", isEqualTo: yeniUserName)

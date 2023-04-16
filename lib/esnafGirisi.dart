@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, file_names
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +12,7 @@ import 'package:ownstyle/profil.dart';
 
 import 'Auth_Service.dart';
 
+// ignore: camel_case_types
 class esnafGirisi extends StatefulWidget {
   String meslek;
   esnafGirisi({
@@ -25,8 +26,10 @@ class esnafGirisi extends StatefulWidget {
 
 class Final {}
 
+// ignore: unused_element
 bool _isloading = false;
 
+// ignore: camel_case_types
 class _esnafGirisiState extends State<esnafGirisi> {
   @override
   Widget build(BuildContext context) {
@@ -59,11 +62,12 @@ class _esnafGirisiState extends State<esnafGirisi> {
                     if (!AuthService().isHaveProfile) {
                       _googleGirisi();
                     } else {
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).push(CupertinoPageRoute(
-                          builder: (context) => MainScreen()));
+                          builder: (context) => const MainScreen()));
                     }
                   },
-                  child: Text("Giriş yap / Üye ol",
+                  child: const Text("Giriş yap / Üye ol",
                       style: TextStyle(color: Colors.black)))
             ],
           ),
@@ -73,9 +77,12 @@ class _esnafGirisiState extends State<esnafGirisi> {
   }
 
   _googleGirisi() async {
+    // ignore: no_leading_underscores_for_local_identifiers
     GoogleSignIn _googleSignIn = GoogleSignIn();
+    // ignore: no_leading_underscores_for_local_identifiers
     GoogleSignInAccount? _googleUser = await _googleSignIn.signIn();
     if (_googleUser != null) {
+      // ignore: no_leading_underscores_for_local_identifiers
       GoogleSignInAuthentication _googleAuth = await _googleUser.authentication;
       try {
         if (_googleAuth.idToken != null && _googleAuth.accessToken != null) {
@@ -83,10 +90,11 @@ class _esnafGirisiState extends State<esnafGirisi> {
               .signInWithCredential(GoogleAuthProvider.credential(
                   idToken: _googleAuth.idToken,
                   accessToken: _googleAuth.accessToken));
-          // ignore: unused_local_variable
+          // ignore: unused_local_variable, await_only_futures, no_leading_underscores_for_local_identifiers
           User? _user = await sonuc.user;
           String a = "esnaf";
           await AuthService().checkUser();
+          // ignore: use_build_context_synchronously
           return Navigator.of(context).pushAndRemoveUntil(
               CupertinoPageRoute(
                   builder: (context) => Profile(

@@ -68,7 +68,5 @@ void notificationTapBackground(NotificationResponse notoficationResponse) async 
   var list = notoficationResponse.payload?.split(",");
   var mesaj = list?[0] ?? "payload gelmedi";
   var numara = list?[1] ?? "05395904016";
-  Future.delayed(Duration(seconds: 3), () async {
-    bool _result = await launchSms(message: mesaj, number: numara);
-  });
+  
 }
