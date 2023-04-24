@@ -65,7 +65,7 @@ class _signInPageState extends State<signInPage> {
                   ),
                   TextButton(
                       onPressed: () async {
-                        if (AuthService().isHaveProfile) {
+                        if (!AuthService().isHaveProfile) {
                           _googleGirisi();
                         } else {
                           Navigator.of(context).pushAndRemoveUntil(
