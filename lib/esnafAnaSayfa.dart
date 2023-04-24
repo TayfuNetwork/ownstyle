@@ -275,7 +275,12 @@ class _MainScreenState extends State<MainScreen> {
                                     List<String> timeParts = saat.split(":");
                                     int hour = int.parse(timeParts[0]);
                                     int minute = int.parse(timeParts[1]);
-                                    DateTime sss = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, hour, minute);
+                                    DateTime sss = DateTime(
+                                        DateTime.now().year,
+                                        DateTime.now().month,
+                                        DateTime.now().day,
+                                        hour,
+                                        minute);
                                     NotificationService()
                                         .randevuZamanla("$manuelNo", sss);
                                     await zamanEkle(
@@ -552,6 +557,30 @@ class _MainScreenState extends State<MainScreen> {
                                                                           .name ??
                                                                       null
                                                             });
+                                                            List<String>
+                                                                timeParts =
+                                                                saat.split(":");
+                                                            int hour =
+                                                                int.parse(
+                                                                    timeParts[
+                                                                        0]);
+                                                            int minute =
+                                                                int.parse(
+                                                                    timeParts[
+                                                                        1]);
+                                                            DateTime sss = DateTime(
+                                                                DateTime.now()
+                                                                    .year,
+                                                                DateTime.now()
+                                                                    .month,
+                                                                DateTime.now()
+                                                                    .day,
+                                                                hour,
+                                                                minute);
+                                                            NotificationService()
+                                                                .randevuZamanla(
+                                                                    "$manuelNo",
+                                                                    sss);
                                                             // ignore: use_build_context_synchronously
                                                             await zamanEkle(
                                                                 context,
@@ -786,6 +815,31 @@ class _MainScreenState extends State<MainScreen> {
                                                                 "no": e.no
                                                                     .toString()
                                                               });
+                                                              List<String>
+                                                                  timeParts =
+                                                                  saat.split(
+                                                                      ":");
+                                                              int hour =
+                                                                  int.parse(
+                                                                      timeParts[
+                                                                          0]);
+                                                              int minute =
+                                                                  int.parse(
+                                                                      timeParts[
+                                                                          1]);
+                                                              DateTime sss = DateTime(
+                                                                  DateTime.now()
+                                                                      .year,
+                                                                  DateTime.now()
+                                                                      .month,
+                                                                  DateTime.now()
+                                                                      .day,
+                                                                  hour,
+                                                                  minute);
+                                                              NotificationService()
+                                                                  .randevuZamanla(
+                                                                      "$manuelNo",
+                                                                      sss);
                                                               await zamanEkle(
                                                                   context,
                                                                   20,
