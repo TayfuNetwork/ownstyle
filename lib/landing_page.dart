@@ -15,12 +15,11 @@ class LandingPage extends StatefulWidget {
 class LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
-    AuthService().checkUser();
     if (FirebaseAuth.instance.currentUser == null) {
       return const signInPage();
     } else {
       if (AuthService().isHaveProfile) {
-        return MainScreen();
+        return const MainScreen();
       } else {
         return const signInPage();
       }

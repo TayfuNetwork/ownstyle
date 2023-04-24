@@ -38,7 +38,7 @@ class _signInPageState extends State<signInPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "Siz hangisisiniz",
+                "Hosgeldiniz",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lato(
                     color: Colors.white,
@@ -51,7 +51,7 @@ class _signInPageState extends State<signInPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
+                  /* TextButton(
                       onPressed: () {
                         Navigator.of(context).push(CupertinoPageRoute(
                             builder: (context) => const musteriGirisi()));
@@ -59,14 +59,13 @@ class _signInPageState extends State<signInPage> {
                       child: const Text(
                         "Müşteri",
                         style: TextStyle(color: Colors.black),
-                      )),
+                      )), */
                   const SizedBox(
                     width: 20,
                   ),
                   TextButton(
                       onPressed: () async {
-                        await AuthService().checkUser();
-                        if (!AuthService().isHaveProfile) {
+                        if (AuthService().isHaveProfile) {
                           _googleGirisi();
                         } else {
                           Navigator.of(context).pushAndRemoveUntil(
@@ -75,7 +74,7 @@ class _signInPageState extends State<signInPage> {
                               (route) => false);
                         }
                       },
-                      child: const Text("Esnaf",
+                      child: const Text("Esnaf Girisi",
                           style: TextStyle(color: Colors.black)))
                 ],
               )
@@ -103,13 +102,13 @@ class _signInPageState extends State<signInPage> {
           await AuthService().checkUser();
           AuthService().isHaveProfile
               ? Navigator.of(context).pushAndRemoveUntil(
+                  CupertinoPageRoute(builder: (context) => MainScreen()),
+                  ((route) => false))
+              : Navigator.of(context).pushAndRemoveUntil(
                   CupertinoPageRoute(
                       builder: (context) => Profile(
                             meslek: a,
                           )),
-                  ((route) => false))
-              : Navigator.of(context).pushAndRemoveUntil(
-                  CupertinoPageRoute(builder: (context) => MainScreen()),
                   ((route) => false));
         }
       } on PlatformException catch (e) {

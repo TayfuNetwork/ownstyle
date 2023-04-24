@@ -44,7 +44,6 @@ class _ProfileState extends State<Profile> {
           elevation: 0,
           backgroundColor: Colors.black12,
           title: Center(child: Text('Profil'.tr())),
-          
         ),
         body: Container(
           decoration: const BoxDecoration(
@@ -63,7 +62,7 @@ class _ProfileState extends State<Profile> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const SizedBox(height: 10),
-                  Text('ProfilSayfaBilgilerDogrulugu'.tr(),
+                  Text('Bilgilerinizi Giriniz'.tr(),
                       style: TextStyle(color: Colors.yellow)),
 
                   /*************/ const SizedBox(height: 10),
@@ -126,7 +125,7 @@ class _ProfileState extends State<Profile> {
                           // ignore: prefer_const_constructors
 
                           onPressed: () async {
-                            if (isim!.isNotEmpty) {
+                            if (isim!.isNotEmpty && meslek != null) {
                               setState(() {
                                 ad = isim!;
 
@@ -158,6 +157,7 @@ class _ProfileState extends State<Profile> {
                               await AuthService().updateUser(myUser);
 
                               myUser = MyUser(
+                                  mail: user.email,
                                   musteri: false,
                                   isim: ad ?? "isimsiz",
                                   id: user.uid,
@@ -170,8 +170,7 @@ class _ProfileState extends State<Profile> {
                                 // ignore: curly_braces_in_flow_control_structures, use_build_context_synchronously
                                 await Navigator.of(context).push(
                                     CupertinoPageRoute(
-                                        builder: (context) =>
-                                            MainScreen()));
+                                        builder: (context) => MainScreen()));
                               Navigator.of(context).pop();
                             } else {
                               Fluttertoast.showToast(
@@ -181,7 +180,7 @@ class _ProfileState extends State<Profile> {
                               );
                             }
                           },
-                          child: Text('KaydetveDevamEt'.tr(),
+                          child: Text('Kaydet ve Devam Et'.tr(),
                               style: TextStyle(color: Colors.white)),
                         )
                     ],
@@ -194,6 +193,4 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
-
-  
 }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ownstyle/randevu_model.dart';
 
 class MyUser {
+  String? mail;
   String? id;
   bool? musteri;
   bool? abone;
@@ -21,6 +22,7 @@ class MyUser {
   String? dateYapilacak;
   List<String>? numaralar = [];
   MyUser({
+    this.mail,
     this.id,
     this.musteri,
     this.abone,
@@ -38,6 +40,7 @@ class MyUser {
   });
 
   MyUser copyWith({
+    String? mail,
     String? id,
     bool? musteri,
     bool? abone,
@@ -47,13 +50,14 @@ class MyUser {
     String? token,
     List<MyDate>? randevu,
     String? dateName,
-    String? dateDate = "",
+    String? dateDate,
     String? dateNo,
     String? dateId,
     String? dateYapilacak,
     List<String>? numaralar,
   }) {
     return MyUser(
+      mail: mail ?? this.mail,
       id: id ?? this.id,
       musteri: musteri ?? this.musteri,
       abone: abone ?? this.abone,
@@ -73,6 +77,7 @@ class MyUser {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'mail': mail,
       'id': id,
       'musteri': musteri,
       'abone': abone,
@@ -92,6 +97,7 @@ class MyUser {
 
   factory MyUser.fromMap(Map<String, dynamic> map) {
     return MyUser(
+      mail: map['mail'] != null ? map['mail'] as String : null,
       id: map['id'] != null ? map['id'] as String : null,
       musteri: map['musteri'] != null ? map['musteri'] as bool : null,
       abone: map['abone'] != null ? map['abone'] as bool : null,
@@ -125,44 +131,47 @@ class MyUser {
 
   @override
   String toString() {
-    return 'MyUser(id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token, randevu: $randevu, dateName: $dateName, dateDate: $dateDate, dateNo: $dateNo, dateId: $dateId, dateYapilacak: $dateYapilacak, numaralar: $numaralar)';
+    return 'MyUser(mail: $mail, id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token, randevu: $randevu, dateName: $dateName, dateDate: $dateDate, dateNo: $dateNo, dateId: $dateId, dateYapilacak: $dateYapilacak, numaralar: $numaralar)';
   }
 
   @override
   bool operator ==(covariant MyUser other) {
     if (identical(this, other)) return true;
-
-    return other.id == id &&
-        other.musteri == musteri &&
-        other.abone == abone &&
-        other.meslek == meslek &&
-        other.isim == isim &&
-        other.no == no &&
-        other.token == token &&
-        listEquals(other.randevu, randevu) &&
-        other.dateName == dateName &&
-        other.dateDate == dateDate &&
-        other.dateNo == dateNo &&
-        other.dateId == dateId &&
-        other.dateYapilacak == dateYapilacak &&
-        listEquals(other.numaralar, numaralar);
+  
+    return 
+      other.mail == mail &&
+      other.id == id &&
+      other.musteri == musteri &&
+      other.abone == abone &&
+      other.meslek == meslek &&
+      other.isim == isim &&
+      other.no == no &&
+      other.token == token &&
+      listEquals(other.randevu, randevu) &&
+      other.dateName == dateName &&
+      other.dateDate == dateDate &&
+      other.dateNo == dateNo &&
+      other.dateId == dateId &&
+      other.dateYapilacak == dateYapilacak &&
+      listEquals(other.numaralar, numaralar);
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        musteri.hashCode ^
-        abone.hashCode ^
-        meslek.hashCode ^
-        isim.hashCode ^
-        no.hashCode ^
-        token.hashCode ^
-        randevu.hashCode ^
-        dateName.hashCode ^
-        dateDate.hashCode ^
-        dateNo.hashCode ^
-        dateId.hashCode ^
-        dateYapilacak.hashCode ^
-        numaralar.hashCode;
+    return mail.hashCode ^
+      id.hashCode ^
+      musteri.hashCode ^
+      abone.hashCode ^
+      meslek.hashCode ^
+      isim.hashCode ^
+      no.hashCode ^
+      token.hashCode ^
+      randevu.hashCode ^
+      dateName.hashCode ^
+      dateDate.hashCode ^
+      dateNo.hashCode ^
+      dateId.hashCode ^
+      dateYapilacak.hashCode ^
+      numaralar.hashCode;
   }
 }
