@@ -101,6 +101,23 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  DateTime? randevuTarihi;
+  _selectDate(a) {
+    if (a == "Bugün") {
+      return randevuTarihi = DateTime.now();
+    } else if (a == "Yarin") {
+      return randevuTarihi = DateTime.now().add(Duration(days: 1));
+    } else if (a == "2 gün sonra") {
+      return randevuTarihi = DateTime.now().add(Duration(days: 2));
+    } else if (a == "3 gün sonra") {
+      return randevuTarihi = DateTime.now().add(Duration(days: 3));
+    } else if (a == "3 gün sonra") {
+      return randevuTarihi = DateTime.now().add(Duration(days: 4));
+    } else if (a == "3 gün sonra") {
+      return randevuTarihi = DateTime.now().add(Duration(days: 5));
+    }
+  }
+
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -130,8 +147,17 @@ class _MainScreenState extends State<MainScreen> {
   /*   sendSMS(String message, String recipents) async {
     bool _result = await launchSms(message: message, number: recipents);
   } */
+  String? secilenRandevuTarihi;
+  String? degisken = "Bugün";
   String musait = AuthService().user?.dateId ?? "08:00";
-
+  List<String> menuItems = [
+    "Bugün",
+    "Yarin",
+    "2 gün sonra",
+    "3 gün sonra",
+    "4 gün sonra",
+    "5 gün sonra"
+  ];
   String saat = "00:00";
   String yapilacak = "";
   @override
@@ -162,145 +188,172 @@ class _MainScreenState extends State<MainScreen> {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Center(
-                      child: Text(
-                        "Randevu Oluştur",
-                        style: TextStyle(color: Colors.red),
+                  return StatefulBuilder(builder: (context, setState) {
+                    return AlertDialog(
+                      title: const Center(
+                        child: Text(
+                          "Randevu Oluştur",
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
-                    ),
-                    actions: <Widget>[
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              const Text(
-                                "No : ",
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                              SizedBox(
-                                width: 200,
-                                child: TextField(
-                                  keyboardType: TextInputType.phone,
-                                  maxLines: 1,
-                                  onChanged: (a) {
-                                    setState(() {
-                                      manuelNo = a;
-                                    });
+                      actions: <Widget>[
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  "No : ",
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                SizedBox(
+                                  width: 200,
+                                  child: TextField(
+                                    keyboardType: TextInputType.phone,
+                                    maxLines: 1,
+                                    onChanged: (a) {
+                                      setState(() {
+                                        manuelNo = a;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "isim : ",
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                SizedBox(
+                                  width: 200,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    onChanged: (a) {
+                                      setState(() {
+                                        manuelIsim = a;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Saat : ",
+                                    style: TextStyle(color: Colors.blue)),
+                                IconButton(
+                                    icon: const Icon(Icons.access_time),
+                                    onPressed: () {
+                                      _selectTime(context);
+                                    }),
+                                const Text(
+                                  "Tarih :",
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                DropdownButton(
+                                  value: secilenRandevuTarihi,
+                                  items: menuItems
+                                      .map<DropdownMenuItem<String>>(
+                                          (String b) {
+                                    return DropdownMenuItem<String>(
+                                      value: b,
+                                      child: Text(b),
+                                      onTap: () {
+                                        setState(() {
+                                          secilenRandevuTarihi = b;
+                                          _selectDate(b);
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                  onChanged: (a) {},
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Text("Yapılacaklar : ",
+                                    style: TextStyle(color: Colors.blue)),
+                                SizedBox(
+                                  width: 200,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    onChanged: (a) {
+                                      setState(() {
+                                        yapilacak = a;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Icon(Icons.cut),
+                                TextButton(
+                                  child: const Text("Kaydet"),
+                                  onPressed: () async {
+                                    if (manuelIsim != null &&
+                                        manuelNo != null &&
+                                        saat != null) {
+                                      AuthService()
+                                          .user
+                                          ?.numaralar!
+                                          .add(manuelNo!);
+
+                                      AuthService()
+                                          .updateUser(AuthService().user!);
+
+                                      await FirebaseFirestore.instance
+                                          .collection("Randevular")
+                                          .doc((AuthService().user!.id))
+                                          .collection("kim")
+                                          .doc(manuelNo.toString())
+                                          .set({
+                                        "no": manuelNo.toString(),
+                                        "dateDate": saat,
+                                        "dateYapilacak": yapilacak,
+                                        // ignore: unnecessary_null_in_if_null_operators
+                                        "dateName": manuelIsim ?? null,
+                                        "dateTarihi": randevuTarihi,
+                                      });
+
+                                      AuthService().checkUser();
+                                      List<String> timeParts = saat.split(":");
+                                      int hour = int.parse(timeParts[0]);
+                                      int minute = int.parse(timeParts[1]);
+                                      DateTime sss = DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day,
+                                          hour,
+                                          minute);
+                                      NotificationService()
+                                          .randevuZamanla("$manuelNo", sss);
+                                      // ignore: use_build_context_synchronously
+                                      await zamanEkle(
+                                          context, 20, todcevir(saat));
+                                      // ignore: use_build_context_synchronously
+                                      Navigator.pop(context);
+                                    } else {}
+
+                                    /************************************************/
                                   },
                                 ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Text(
-                                "isim : ",
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                              SizedBox(
-                                width: 200,
-                                child: TextField(
-                                  maxLines: 1,
-                                  onChanged: (a) {
-                                    setState(() {
-                                      manuelIsim = a;
-                                    });
-                                  },
+                                const Icon(
+                                  Icons.cut,
                                 ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Text("Saat : ",
-                                  style: TextStyle(color: Colors.blue)),
-                              IconButton(
-                                  icon: const Icon(Icons.access_time),
-                                  onPressed: () {
-                                    _selectTime(context);
-                                  }),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Text("Yapılacaklar : ",
-                                  style: TextStyle(color: Colors.blue)),
-                              SizedBox(
-                                width: 200,
-                                child: TextField(
-                                  maxLines: 1,
-                                  onChanged: (a) {
-                                    setState(() {
-                                      yapilacak = a;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Icon(Icons.cut),
-                              TextButton(
-                                child: const Text("Kaydet"),
-                                onPressed: () async {
-                                  if (manuelIsim != null &&
-                                      manuelNo != null &&
-                                      saat != null) {
-                                    AuthService()
-                                        .user
-                                        ?.numaralar!
-                                        .add(manuelNo!);
-
-                                    AuthService()
-                                        .updateUser(AuthService().user!);
-
-                                    await FirebaseFirestore.instance
-                                        .collection("Randevular")
-                                        .doc((AuthService().user!.id))
-                                        .collection("kim")
-                                        .doc(manuelNo.toString())
-                                        .set({
-                                      "no": manuelNo.toString(),
-                                      "dateDate": saat,
-                                      "dateYapilacak": yapilacak,
-                                      // ignore: unnecessary_null_in_if_null_operators
-                                      "dateName": manuelIsim ?? null
-                                    });
-
-                                    AuthService().checkUser();
-                                    List<String> timeParts = saat.split(":");
-                                    int hour = int.parse(timeParts[0]);
-                                    int minute = int.parse(timeParts[1]);
-                                    DateTime sss = DateTime(
-                                        DateTime.now().year,
-                                        DateTime.now().month,
-                                        DateTime.now().day,
-                                        hour,
-                                        minute);
-                                    NotificationService()
-                                        .randevuZamanla("$manuelNo", sss);
-                                    await zamanEkle(
-                                        context, 20, todcevir(saat));
-                                    // ignore: use_build_context_synchronously
-                                    Navigator.pop(context);
-                                  } else {}
-
-                                  /************************************************/
-                                },
-                              ),
-                              const Icon(
-                                Icons.cut,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ],
-                  );
+                              ],
+                            )
+                          ],
+                        ),
+                      ],
+                    );
+                  });
                 });
           },
           foregroundColor: Colors.white,
@@ -383,10 +436,11 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                       child: Text(
                         "$musait ve sonrasında kayıt yok",
-                        style: TextStyle(color: Colors.blue, fontSize: 20),
+                        style:
+                            const TextStyle(color: Colors.blue, fontSize: 20),
                       ),
                     ),
                     const Padding(
