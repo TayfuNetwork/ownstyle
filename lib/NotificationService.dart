@@ -39,7 +39,7 @@ class NotificationService {
         FlutterLocalNotificationsPlugin();
     final DateTime date = zaman;
     final scheduledNotificationDateTime =
-        date.subtract(const Duration(minutes: 20));
+        date.subtract( Duration(minutes: 20));
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'your_channel_id', 'Scheduled Notification',
         importance: Importance.max, priority: Priority.high);
@@ -48,8 +48,7 @@ class NotificationService {
 
     int notificationId = DateTime.now()
         .millisecondsSinceEpoch
-        .remainder(100000); // random id oluşturuluyor
-
+        .remainder(100000); 
     await flutterLocalNotificationsPlugin.schedule(
         payload: "$numara",
         notificationId,

@@ -1,5 +1,7 @@
 // ignore_for_file: file_names
 
+import 'dart:async';
+
 import 'package:call_log/call_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -118,6 +120,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  var a;
+  var b;
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -126,6 +130,8 @@ class _MainScreenState extends State<MainScreen> {
     if (pickedTime != null) {
       setState(() {
         saat = ('${pickedTime.hour}:${pickedTime.minute}');
+        a = pickedTime.hour;
+        b = pickedTime.minute;
       });
     }
   }
@@ -147,6 +153,7 @@ class _MainScreenState extends State<MainScreen> {
   /*   sendSMS(String message, String recipents) async {
     bool _result = await launchSms(message: message, number: recipents);
   } */
+  int? secilecekDegisken;
   String? secilenRandevuTarihi;
   String? degisken = "Bugün";
   String musait = AuthService().user?.dateId ?? "08:00";
@@ -158,6 +165,59 @@ class _MainScreenState extends State<MainScreen> {
     "4 gün sonra",
     "5 gün sonra"
   ];
+  List<int> sureItems = [
+    20,
+    40,
+    60,
+    90,
+    120,
+  ];
+
+  deleteDataAtSpecificTime(user) {
+    DateTime now = DateTime.now();
+    DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
+
+    Duration difference = targetTime.difference(now);
+
+    Timer(difference, () => deleteDate(user));
+  }
+
+  deleteManuelDataAtSpecificTime(t) {
+    DateTime now = DateTime.now();
+    DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
+
+    Duration difference = targetTime.difference(now);
+
+    Timer(difference, () => deleteManuelDate(t));
+  }
+
+  deleteManuelDate(e) {
+    FirebaseFirestore.instance
+        .collection("Randevular")
+        .doc("${AuthService().user!.id}")
+        .collection("kim")
+        .doc(e)
+        .delete();
+    AuthService().user!.numaralar!.removeWhere((element) => element == e);
+    AuthService().updateUser(AuthService().user!);
+  }
+
+  deleteDate(e) {
+    FirebaseFirestore.instance
+        .collection("Randevular")
+        .doc("${AuthService().user!.id}")
+        .collection("kim")
+        .doc(e.no)
+        .delete();
+    AuthService().user!.numaralar!.removeWhere((element) => element == e.no);
+    setState(() {
+      musait = saat;
+    });
+    AuthService().updateUser(AuthService().user!);
+    Navigator.pop(context);
+  }
+
+  int? degiskenZaman = 20;
   String saat = "00:00";
   String yapilacak = "";
   @override
@@ -274,19 +334,24 @@ class _MainScreenState extends State<MainScreen> {
                             ),
                             Row(
                               children: [
-                                const Text("Yapılacaklar : ",
+                                const Text("Tahmini Sürecek Dakika : ",
                                     style: TextStyle(color: Colors.blue)),
-                                SizedBox(
-                                  width: 200,
-                                  child: TextField(
-                                    maxLines: 1,
-                                    onChanged: (a) {
-                                      setState(() {
-                                        yapilacak = a;
-                                      });
-                                    },
-                                  ),
-                                ),
+                                DropdownButton(
+                                  value: degiskenZaman,
+                                  items: sureItems
+                                      .map<DropdownMenuItem<int>>((int b) {
+                                    return DropdownMenuItem<int>(
+                                      value: b,
+                                      child: Text("$b"),
+                                      onTap: () {
+                                        setState(() {
+                                          degiskenZaman = b;
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                  onChanged: (a) {},
+                                )
                               ],
                             ),
                             Row(
@@ -335,10 +400,12 @@ class _MainScreenState extends State<MainScreen> {
                                       NotificationService()
                                           .randevuZamanla("$manuelNo", sss);
                                       // ignore: use_build_context_synchronously
-                                      await zamanEkle(
-                                          context, 20, todcevir(saat));
+                                      await zamanEkle(context, degiskenZaman,
+                                          todcevir(saat));
                                       // ignore: use_build_context_synchronously
                                       Navigator.pop(context);
+
+                                      deleteManuelDataAtSpecificTime(manuelNo);
                                     } else {}
 
                                     /************************************************/
@@ -540,21 +607,30 @@ class _MainScreenState extends State<MainScreen> {
                                                     Row(
                                                       children: [
                                                         const Text(
-                                                            "Yapılacaklar : ",
+                                                            "Tahmini Sürecek Dakika : ",
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .blue)),
-                                                        SizedBox(
-                                                          width: 200,
-                                                          child: TextField(
-                                                            maxLines: 1,
-                                                            onChanged: (a) {
-                                                              setState(() {
-                                                                yapilacak = a;
-                                                              });
-                                                            },
-                                                          ),
-                                                        ),
+                                                        DropdownButton(
+                                                          value: degiskenZaman,
+                                                          items: sureItems.map<
+                                                              DropdownMenuItem<
+                                                                  int>>((int
+                                                              b) {
+                                                            return DropdownMenuItem<
+                                                                int>(
+                                                              value: b,
+                                                              child: Text("$b"),
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  degiskenZaman =
+                                                                      b;
+                                                                });
+                                                              },
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (a) {},
+                                                        )
                                                       ],
                                                     ),
                                                     Row(
@@ -569,11 +645,15 @@ class _MainScreenState extends State<MainScreen> {
                                                           child: const Text(
                                                               "Kaydet"),
                                                           onPressed: () async {
-                                                            randevuZamanla(
+                                                            /*  randevuZamanla(
                                                                 "Sevgili ${callLogEntry.name ?? 'Müşterimiz'} ${AuthService().user!.isim} de ki randevunuza son 20 dakikanız kaldığını hatırlatmak isteriz. Bizi tercih ettiğiniz için teşekkür eder memnuniyet dileriz.",
                                                                 "${callLogEntry.number}",
                                                                 20,
-                                                                "$manuelIsim");
+                                                                "$manuelIsim"); */
+
+                                                            deleteManuelDataAtSpecificTime(
+                                                                callLogEntry
+                                                                    .number);
                                                             AuthService()
                                                                 .user
                                                                 ?.numaralar!
@@ -638,7 +718,7 @@ class _MainScreenState extends State<MainScreen> {
                                                             // ignore: use_build_context_synchronously
                                                             await zamanEkle(
                                                                 context,
-                                                                20,
+                                                                degiskenZaman,
                                                                 todcevir(saat));
                                                             // ignore: use_build_context_synchronously
                                                             Navigator.pop(
@@ -781,21 +861,32 @@ class _MainScreenState extends State<MainScreen> {
                                                       Row(
                                                         children: [
                                                           const Text(
-                                                              "Yapılacaklar : ",
+                                                              "Tahmini Sürecek Dakika : ",
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .blue)),
-                                                          SizedBox(
-                                                            width: 200,
-                                                            child: TextField(
-                                                              maxLines: 1,
-                                                              onChanged: (a) {
-                                                                setState(() {
-                                                                  yapilacak = a;
-                                                                });
-                                                              },
-                                                            ),
-                                                          ),
+                                                          DropdownButton(
+                                                            value:
+                                                                degiskenZaman,
+                                                            items: sureItems.map<
+                                                                DropdownMenuItem<
+                                                                    int>>((int
+                                                                b) {
+                                                              return DropdownMenuItem<
+                                                                  int>(
+                                                                value: b,
+                                                                child:
+                                                                    Text("$b"),
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    degiskenZaman =
+                                                                        b;
+                                                                  });
+                                                                },
+                                                              );
+                                                            }).toList(),
+                                                            onChanged: (a) {},
+                                                          )
                                                         ],
                                                       ),
                                                       Row(
@@ -808,32 +899,7 @@ class _MainScreenState extends State<MainScreen> {
                                                           const Icon(Icons.cut),
                                                           TextButton(
                                                               onPressed: () {
-                                                                FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "Randevular")
-                                                                    .doc(
-                                                                        "${AuthService().user!.id}")
-                                                                    .collection(
-                                                                        "kim")
-                                                                    .doc(e.no)
-                                                                    .delete();
-                                                                AuthService()
-                                                                    .user!
-                                                                    .numaralar!
-                                                                    .removeWhere(
-                                                                        (element) =>
-                                                                            element ==
-                                                                            e.no);
-                                                                setState(() {
-                                                                  musait = saat;
-                                                                });
-                                                                AuthService()
-                                                                    .updateUser(
-                                                                        AuthService()
-                                                                            .user!);
-                                                                Navigator.pop(
-                                                                    context);
+                                                                deleteDate(e);
                                                               },
                                                               child: const Text(
                                                                   "Sil")),
@@ -842,6 +908,8 @@ class _MainScreenState extends State<MainScreen> {
                                                                 "Kaydet"),
                                                             onPressed:
                                                                 () async {
+                                                              deleteManuelDataAtSpecificTime(
+                                                                  e.no);
                                                               // ignore: use_build_context_synchronously
                                                               Navigator.pop(
                                                                   context);
@@ -896,7 +964,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                       sss);
                                                               await zamanEkle(
                                                                   context,
-                                                                  20,
+                                                                  degiskenZaman,
                                                                   todcevir(
                                                                       saat));
 
