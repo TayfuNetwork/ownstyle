@@ -1,11 +1,11 @@
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:ownstyle/Auth_Service.dart';
-import 'package:ownstyle/landing_page.dart';
+import 'package:ownstyle/services/Auth_Service.dart';
+import 'package:ownstyle/pages/landing_page.dart';
 import 'package:in_app_update/in_app_update.dart';
 
-import 'NotificationService.dart';
+import 'services/NotificationService.dart';
 
 GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 

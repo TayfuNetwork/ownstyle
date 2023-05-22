@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ownstyle/esnafAnaSayfa.dart';
-import 'package:ownstyle/servisler.dart';
-import 'package:ownstyle/sign_in_page.dart';
-import 'package:ownstyle/user_model.dart';
+import 'package:ownstyle/services/servisler.dart';
+import 'package:ownstyle/pages/sign_in_page.dart';
+import 'package:ownstyle/models/user_model.dart';
 
-import 'Auth_Service.dart';
+import '../services/Auth_Service.dart';
 
 // ignore: camel_case_types
 
@@ -138,6 +138,8 @@ class _ProfileState extends State<Profile> {
                               );
 
                               MyUser myUser = MyUser(
+                                  saatler: [],
+                                  abone: false,
                                   isim: ad ?? "isimsiz",
                                   id: user.uid,
                                   meslek: (meslek)!.meslek,
@@ -157,6 +159,8 @@ class _ProfileState extends State<Profile> {
                               await AuthService().updateUser(myUser);
 
                               myUser = MyUser(
+                                  saatler: [],
+                                  abone: false,
                                   mail: user.email,
                                   musteri: false,
                                   isim: ad ?? "isimsiz",

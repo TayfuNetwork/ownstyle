@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ownstyle/esnafGirisi.dart';
-import 'package:ownstyle/musteriGirisi.dart';
-import 'package:ownstyle/profil.dart';
+import 'package:ownstyle/pages/esnafGirisi.dart';
+import 'package:ownstyle/pages/musteriGirisi.dart';
+import 'package:ownstyle/pages/profil.dart';
 
-import 'Auth_Service.dart';
-import 'esnafAnaSayfa.dart';
+import '../services/Auth_Service.dart';
+import '../esnafAnaSayfa.dart';
 
 class signInPage extends StatefulWidget {
   const signInPage({super.key});

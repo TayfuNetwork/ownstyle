@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ownstyle/Auth_Service.dart';
+import 'package:ownstyle/services/Auth_Service.dart';
 
 class SearchService {
   bool isHaveProfile = false;

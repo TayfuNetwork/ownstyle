@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ownstyle/esnafAnaSayfa.dart';
-import 'package:ownstyle/sign_in_page.dart';
+import 'package:ownstyle/pages/sign_in_page.dart';
 
-import 'Auth_Service.dart';
+import '../services/Auth_Service.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);

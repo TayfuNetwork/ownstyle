@@ -8,9 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:ownstyle/esnafAnaSayfa.dart';
-import 'package:ownstyle/profil.dart';
+import 'package:ownstyle/pages/profil.dart';
 
-import 'Auth_Service.dart';
+import '../services/Auth_Service.dart';
 
 // ignore: camel_case_types
 class esnafGirisi extends StatefulWidget {
@@ -64,7 +64,7 @@ class _esnafGirisiState extends State<esnafGirisi> {
                     } else {
                       // ignore: use_build_context_synchronously
                       Navigator.of(context).push(CupertinoPageRoute(
-                          builder: (context) => const MainScreen()));
+                          builder: (context) =>  MainScreen()));
                     }
                   },
                   child: const Text("Giriş yap / Üye ol",

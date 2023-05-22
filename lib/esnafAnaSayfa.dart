@@ -9,12 +9,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ownstyle/Auth_Service.dart';
-import 'package:ownstyle/NotificationService.dart';
-import 'package:ownstyle/search_service.dart';
-import 'package:ownstyle/sign_in_page.dart';
-import 'package:ownstyle/user_model.dart';
+import 'package:ownstyle/pages/myDrawer.dart';
+import 'package:ownstyle/services/Auth_Service.dart';
+import 'package:ownstyle/services/NotificationService.dart';
+
+import 'package:ownstyle/services/search_service.dart';
+
+import 'package:ownstyle/models/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 
@@ -173,15 +176,6 @@ class _MainScreenState extends State<MainScreen> {
     120,
   ];
 
-  deleteDataAtSpecificTime(user) {
-    DateTime now = DateTime.now();
-    DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
-
-    Duration difference = targetTime.difference(now);
-
-    Timer(difference, () => deleteDate(user));
-  }
-
   deleteManuelDataAtSpecificTime(t) {
     DateTime now = DateTime.now();
     DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
@@ -199,6 +193,7 @@ class _MainScreenState extends State<MainScreen> {
         .doc(e)
         .delete();
     AuthService().user!.numaralar!.removeWhere((element) => element == e);
+    AuthService().user!.saatler!.removeWhere((element) => element == saat);
     AuthService().updateUser(AuthService().user!);
   }
 
@@ -210,6 +205,7 @@ class _MainScreenState extends State<MainScreen> {
         .doc(e.no)
         .delete();
     AuthService().user!.numaralar!.removeWhere((element) => element == e.no);
+    AuthService().user!.saatler!.removeWhere((element) => element == saat);
     setState(() {
       musait = saat;
     });
@@ -242,6 +238,7 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
+      drawer: MyDrawer(),
       floatingActionButton: FloatingActionButton.large(
           backgroundColor: const Color.fromARGB(255, 106, 81, 203),
           onPressed: () {
@@ -362,53 +359,65 @@ class _MainScreenState extends State<MainScreen> {
                                 TextButton(
                                   child: const Text("Kaydet"),
                                   onPressed: () async {
-                                    if (manuelIsim != null &&
-                                        manuelNo != null &&
-                                        saat != null) {
-                                      AuthService()
-                                          .user
-                                          ?.numaralar!
-                                          .add(manuelNo!);
+                                    List<String>? x =
+                                        AuthService().user?.saatler ?? [];
+                                    if (x.contains(saat)) {
+                                      Fluttertoast.showToast(
+                                        msg: "Bu saatte randevu bulunmaktadır"
+                                            .tr(),
+                                        gravity: ToastGravity.BOTTOM,
+                                        toastLength: Toast.LENGTH_LONG,
+                                      );
+                                    } else {
+                                      if (manuelIsim != null &&
+                                          manuelNo != null &&
+                                          saat != null) {
+                                        AuthService()
+                                            .user
+                                            ?.numaralar!
+                                            .add(manuelNo!);
+                                        AuthService().user?.saatler!.add(saat);
 
-                                      AuthService()
-                                          .updateUser(AuthService().user!);
+                                        AuthService()
+                                            .updateUser(AuthService().user!);
 
-                                      await FirebaseFirestore.instance
-                                          .collection("Randevular")
-                                          .doc((AuthService().user!.id))
-                                          .collection("kim")
-                                          .doc(manuelNo.toString())
-                                          .set({
-                                        "no": manuelNo.toString(),
-                                        "dateDate": saat,
-                                        "dateYapilacak": yapilacak,
-                                        // ignore: unnecessary_null_in_if_null_operators
-                                        "dateName": manuelIsim ?? null,
-                                        "dateTarihi": randevuTarihi,
-                                      });
+                                        await FirebaseFirestore.instance
+                                            .collection("Randevular")
+                                            .doc((AuthService().user!.id))
+                                            .collection("kim")
+                                            .doc(manuelNo.toString())
+                                            .set({
+                                          "no": manuelNo.toString(),
+                                          "dateDate": saat,
+                                          "dateYapilacak": yapilacak,
+                                          // ignore: unnecessary_null_in_if_null_operators
+                                          "dateName": manuelIsim ?? null,
+                                          "dateTarihi": randevuTarihi,
+                                        });
 
-                                      AuthService().checkUser();
-                                      List<String> timeParts = saat.split(":");
-                                      int hour = int.parse(timeParts[0]);
-                                      int minute = int.parse(timeParts[1]);
-                                      DateTime sss = DateTime(
-                                          DateTime.now().year,
-                                          DateTime.now().month,
-                                          DateTime.now().day,
-                                          hour,
-                                          minute);
-                                      NotificationService()
-                                          .randevuZamanla("$manuelNo", sss);
-                                      // ignore: use_build_context_synchronously
-                                      await zamanEkle(context, degiskenZaman,
-                                          todcevir(saat));
-                                      // ignore: use_build_context_synchronously
-                                      Navigator.pop(context);
+                                        AuthService().checkUser();
+                                        List<String> timeParts =
+                                            saat.split(":");
+                                        int hour = int.parse(timeParts[0]);
+                                        int minute = int.parse(timeParts[1]);
+                                        DateTime sss = DateTime(
+                                            DateTime.now().year,
+                                            DateTime.now().month,
+                                            DateTime.now().day,
+                                            hour,
+                                            minute);
+                                        NotificationService()
+                                            .randevuZamanla("$manuelNo", sss);
+                                        // ignore: use_build_context_synchronously
+                                        await zamanEkle(context, degiskenZaman,
+                                            todcevir(saat));
+                                        // ignore: use_build_context_synchronously
+                                        Navigator.pop(context);
 
-                                      deleteManuelDataAtSpecificTime(manuelNo);
-                                    } else {}
-
-                                    /************************************************/
+                                        deleteManuelDataAtSpecificTime(
+                                            manuelNo);
+                                      } else {}
+                                    }
                                   },
                                 ),
                                 const Icon(
@@ -428,57 +437,15 @@ class _MainScreenState extends State<MainScreen> {
           child: const Icon(Icons.add_alarm)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       appBar: AppBar(
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)),
-                      title: Center(
-                        child: Text(
-                          "Uygulamadan Cikiliyor".tr(),
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                      actions: <Widget>[
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                                onPressed: () async {
-                                  _cikisYap();
-                                  Navigator.pop(context);
-                                },
-                                child: Text(
-                                  "Cikis Yap".tr(),
-                                  style: const TextStyle(color: Colors.blue),
-                                )),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text("Vazgeç".tr(),
-                                  style: const TextStyle(color: Colors.blue)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  });
-            },
-            child: const Text(
-              'Cikis Yap',
-              style: TextStyle(color: (Colors.red)),
-            ),
+        actions: const [
+          Icon(
+            Icons.online_prediction,
+            color: Colors.blue,
           )
         ],
         toolbarHeight: 70,
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue,
         title: Center(
           child: Text(
             isim!,
@@ -499,7 +466,7 @@ class _MainScreenState extends State<MainScreen> {
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
-                color: Colors.white,
+                //color: Colors.white,
                 child: Column(
                   children: [
                     Padding(
@@ -645,86 +612,105 @@ class _MainScreenState extends State<MainScreen> {
                                                           child: const Text(
                                                               "Kaydet"),
                                                           onPressed: () async {
-                                                            /*  randevuZamanla(
-                                                                "Sevgili ${callLogEntry.name ?? 'Müşterimiz'} ${AuthService().user!.isim} de ki randevunuza son 20 dakikanız kaldığını hatırlatmak isteriz. Bizi tercih ettiğiniz için teşekkür eder memnuniyet dileriz.",
-                                                                "${callLogEntry.number}",
-                                                                20,
-                                                                "$manuelIsim"); */
-
-                                                            deleteManuelDataAtSpecificTime(
-                                                                callLogEntry
-                                                                    .number);
-                                                            AuthService()
-                                                                .user
-                                                                ?.numaralar!
-                                                                .add(callLogEntry
-                                                                    .number!);
-
-                                                            AuthService()
-                                                                .updateUser(
-                                                                    AuthService()
-                                                                        .user!);
-
-                                                            await FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    "Randevular")
-                                                                .doc(
-                                                                    (AuthService()
-                                                                        .user!
-                                                                        .id))
-                                                                .collection(
-                                                                    "kim")
-                                                                .doc(callLogEntry
-                                                                    .number
-                                                                    .toString())
-                                                                .set({
-                                                              "no": callLogEntry
-                                                                  .number
-                                                                  .toString(),
-                                                              "dateDate": saat,
-                                                              "dateYapilacak":
-                                                                  yapilacak,
-                                                              "dateName":
-                                                                  // ignore: unnecessary_null_in_if_null_operators
+                                                            List<String>? x =
+                                                                AuthService()
+                                                                        .user
+                                                                        ?.saatler ??
+                                                                    [];
+                                                            if (x.contains(
+                                                                saat)) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                msg:
+                                                                    "Bu saatte randevu bulunmaktadır"
+                                                                        .tr(),
+                                                                gravity:
+                                                                    ToastGravity
+                                                                        .BOTTOM,
+                                                                toastLength: Toast
+                                                                    .LENGTH_LONG,
+                                                              );
+                                                            } else {
+                                                              deleteManuelDataAtSpecificTime(
                                                                   callLogEntry
-                                                                          .name ??
-                                                                      null
-                                                            });
-                                                            List<String>
-                                                                timeParts =
-                                                                saat.split(":");
-                                                            int hour =
-                                                                int.parse(
-                                                                    timeParts[
-                                                                        0]);
-                                                            int minute =
-                                                                int.parse(
-                                                                    timeParts[
-                                                                        1]);
-                                                            DateTime sss = DateTime(
-                                                                DateTime.now()
-                                                                    .year,
-                                                                DateTime.now()
-                                                                    .month,
-                                                                DateTime.now()
-                                                                    .day,
-                                                                hour,
-                                                                minute);
-                                                            NotificationService()
-                                                                .randevuZamanla(
-                                                                    "$manuelNo",
-                                                                    sss);
-                                                            // ignore: use_build_context_synchronously
-                                                            await zamanEkle(
-                                                                context,
-                                                                degiskenZaman,
-                                                                todcevir(saat));
-                                                            // ignore: use_build_context_synchronously
-                                                            Navigator.pop(
-                                                                context);
+                                                                      .number);
+                                                              AuthService()
+                                                                  .user
+                                                                  ?.numaralar!
+                                                                  .add(callLogEntry
+                                                                      .number!);
+                                                              AuthService()
+                                                                  .user
+                                                                  ?.saatler!
+                                                                  .add(saat);
 
-                                                            /************************************************/
+                                                              AuthService()
+                                                                  .updateUser(
+                                                                      AuthService()
+                                                                          .user!);
+
+                                                              await FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "Randevular")
+                                                                  .doc(
+                                                                      (AuthService()
+                                                                          .user!
+                                                                          .id))
+                                                                  .collection(
+                                                                      "kim")
+                                                                  .doc(callLogEntry
+                                                                      .number
+                                                                      .toString())
+                                                                  .set({
+                                                                "no": callLogEntry
+                                                                    .number
+                                                                    .toString(),
+                                                                "dateDate":
+                                                                    saat,
+                                                                "dateYapilacak":
+                                                                    yapilacak,
+                                                                "dateName":
+                                                                    // ignore: unnecessary_null_in_if_null_operators
+                                                                    callLogEntry
+                                                                            .name ??
+                                                                        null
+                                                              });
+                                                              List<String>
+                                                                  timeParts =
+                                                                  saat.split(
+                                                                      ":");
+                                                              int hour =
+                                                                  int.parse(
+                                                                      timeParts[
+                                                                          0]);
+                                                              int minute =
+                                                                  int.parse(
+                                                                      timeParts[
+                                                                          1]);
+                                                              DateTime sss = DateTime(
+                                                                  DateTime.now()
+                                                                      .year,
+                                                                  DateTime.now()
+                                                                      .month,
+                                                                  DateTime.now()
+                                                                      .day,
+                                                                  hour,
+                                                                  minute);
+                                                              NotificationService()
+                                                                  .randevuZamanla(
+                                                                      "$manuelNo",
+                                                                      sss);
+                                                              // ignore: use_build_context_synchronously
+                                                              await zamanEkle(
+                                                                  context,
+                                                                  degiskenZaman,
+                                                                  todcevir(
+                                                                      saat));
+                                                              // ignore: use_build_context_synchronously
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
                                                           },
                                                         ),
                                                         const Icon(
@@ -908,67 +894,89 @@ class _MainScreenState extends State<MainScreen> {
                                                                 "Kaydet"),
                                                             onPressed:
                                                                 () async {
-                                                              deleteManuelDataAtSpecificTime(
-                                                                  e.no);
-                                                              // ignore: use_build_context_synchronously
-                                                              Navigator.pop(
-                                                                  context);
-                                                              await FirebaseFirestore
-                                                                  .instance
-                                                                  .collection(
-                                                                      "Randevular")
-                                                                  .doc(
-                                                                      (AuthService()
-                                                                          .user!
-                                                                          .id))
-                                                                  .collection(
-                                                                      "kim")
-                                                                  .doc(e.no!
-                                                                      .toString())
-                                                                  .set({
-                                                                "dateDate": saat
-                                                                    .toString(),
-                                                                "dateYapilacak":
-                                                                    yapilacak,
-                                                                "dateName":
-                                                                    // ignore: unnecessary_null_in_if_null_operators
-                                                                    e.dateName ??
-                                                                        null,
-                                                                "no": e.no
-                                                                    .toString()
-                                                              });
-                                                              List<String>
-                                                                  timeParts =
-                                                                  saat.split(
-                                                                      ":");
-                                                              int hour =
-                                                                  int.parse(
-                                                                      timeParts[
-                                                                          0]);
-                                                              int minute =
-                                                                  int.parse(
-                                                                      timeParts[
-                                                                          1]);
-                                                              DateTime sss = DateTime(
-                                                                  DateTime.now()
-                                                                      .year,
-                                                                  DateTime.now()
-                                                                      .month,
-                                                                  DateTime.now()
-                                                                      .day,
-                                                                  hour,
-                                                                  minute);
-                                                              NotificationService()
-                                                                  .randevuZamanla(
-                                                                      "$manuelNo",
-                                                                      sss);
-                                                              await zamanEkle(
-                                                                  context,
-                                                                  degiskenZaman,
-                                                                  todcevir(
-                                                                      saat));
-
-                                                              /************************************************/
+                                                              List<String>? x =
+                                                                  AuthService()
+                                                                          .user
+                                                                          ?.saatler ??
+                                                                      [];
+                                                              if (x.contains(
+                                                                  saat)) {
+                                                                Fluttertoast
+                                                                    .showToast(
+                                                                  msg:
+                                                                      "Bu saatte randevu bulunmaktadır"
+                                                                          .tr(),
+                                                                  gravity:
+                                                                      ToastGravity
+                                                                          .BOTTOM,
+                                                                  toastLength: Toast
+                                                                      .LENGTH_LONG,
+                                                                );
+                                                              } else {
+                                                                AuthService()
+                                                                    .user
+                                                                    ?.saatler!
+                                                                    .add(saat);
+                                                                deleteManuelDataAtSpecificTime(
+                                                                    e.no);
+                                                                // ignore: use_build_context_synchronously
+                                                                Navigator.pop(
+                                                                    context);
+                                                                await FirebaseFirestore
+                                                                    .instance
+                                                                    .collection(
+                                                                        "Randevular")
+                                                                    .doc((AuthService()
+                                                                        .user!
+                                                                        .id))
+                                                                    .collection(
+                                                                        "kim")
+                                                                    .doc(e.no!
+                                                                        .toString())
+                                                                    .set({
+                                                                  "dateDate": saat
+                                                                      .toString(),
+                                                                  "dateYapilacak":
+                                                                      yapilacak,
+                                                                  "dateName":
+                                                                      // ignore: unnecessary_null_in_if_null_operators
+                                                                      e.dateName ??
+                                                                          null,
+                                                                  "no": e.no
+                                                                      .toString()
+                                                                });
+                                                                List<String>
+                                                                    timeParts =
+                                                                    saat.split(
+                                                                        ":");
+                                                                int hour =
+                                                                    int.parse(
+                                                                        timeParts[
+                                                                            0]);
+                                                                int minute =
+                                                                    int.parse(
+                                                                        timeParts[
+                                                                            1]);
+                                                                DateTime sss = DateTime(
+                                                                    DateTime.now()
+                                                                        .year,
+                                                                    DateTime.now()
+                                                                        .month,
+                                                                    DateTime.now()
+                                                                        .day,
+                                                                    hour,
+                                                                    minute);
+                                                                NotificationService()
+                                                                    .randevuZamanla(
+                                                                        "$manuelNo",
+                                                                        sss);
+                                                                // ignore: use_build_context_synchronously
+                                                                await zamanEkle(
+                                                                    context,
+                                                                    degiskenZaman,
+                                                                    todcevir(
+                                                                        saat));
+                                                              }
                                                             },
                                                           ),
                                                           const Icon(
@@ -1024,49 +1032,5 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       musait = timeString.toString();
     });
-  }
-
-  Column customerControl() {
-    return Column(
-      children: [
-        Row(
-          children: const [
-            Text("Şu an ki müşteriniz ", style: TextStyle(color: Colors.white)),
-            Text("Tayfun Kaya", style: TextStyle(color: Colors.red))
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const Text("Yapılacaklar ",
-                  style: TextStyle(color: Colors.white)),
-              // ignore: unnecessary_string_interpolations
-              Text("$yapilacak", style: const TextStyle(color: Colors.red))
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Text dateControl() {
-    if (1 == 1) {
-      return const Text("Randevusuz",
-          style: TextStyle(color: Colors.pink, fontSize: 16));
-    } else {
-      return const Text("Randevusuz",
-          style: TextStyle(color: Colors.pink, fontSize: 16));
-    }
-  }
-
-  Future _cikisYap() async {
-    await FirebaseAuth.instance.signOut();
-    await GoogleSignIn().disconnect();
-    await GoogleSignIn().signOut();
-    // ignore: use_build_context_synchronously
-    await Navigator.of(context).pushAndRemoveUntil(
-        CupertinoPageRoute(builder: (context) => const signInPage()),
-        (route) => false);
   }
 }
