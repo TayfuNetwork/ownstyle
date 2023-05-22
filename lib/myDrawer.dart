@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ownstyle/pages/sign_in_page.dart';
 import 'package:ownstyle/services/Auth_Service.dart';
-import 'package:ownstyle/sign_in_page.dart';
 import 'package:ownstyle/models/user_model.dart';
 
 //import 'package:in_app_update/in_app_update.dart';
