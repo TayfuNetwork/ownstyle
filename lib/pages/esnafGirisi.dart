@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import 'package:ownstyle/esnafAnaSayfa.dart';
 import 'package:ownstyle/pages/profil.dart';
 
 import '../services/Auth_Service.dart';
@@ -63,8 +61,8 @@ class _esnafGirisiState extends State<esnafGirisi> {
                       _googleGirisi();
                     } else {
                       // ignore: use_build_context_synchronously
-                      Navigator.of(context).push(CupertinoPageRoute(
-                          builder: (context) =>  MainScreen()));
+
+                      // ignore: use_build_context_synchronously
                     }
                   },
                   child: const Text("Giriş yap / Üye ol",

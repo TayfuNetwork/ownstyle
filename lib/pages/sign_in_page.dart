@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ownstyle/pages/esnafGirisi.dart';
-import 'package:ownstyle/pages/musteriGirisi.dart';
 import 'package:ownstyle/pages/profil.dart';
 
 import '../services/Auth_Service.dart';
@@ -70,7 +68,7 @@ class _signInPageState extends State<signInPage> {
                         } else {
                           Navigator.of(context).pushAndRemoveUntil(
                               CupertinoPageRoute(
-                                  builder: (context) => MainScreen()),
+                                  builder: (context) => const MainScreen()),
                               (route) => false);
                         }
                       },
@@ -86,23 +84,23 @@ class _signInPageState extends State<signInPage> {
   }
 
   _googleGirisi() async {
-    GoogleSignIn _googleSignIn = GoogleSignIn();
-    GoogleSignInAccount? _googleUser = await _googleSignIn.signIn();
-    if (_googleUser != null) {
-      GoogleSignInAuthentication _googleAuth = await _googleUser.authentication;
+    GoogleSignIn googleSignIn = GoogleSignIn();
+    GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser != null) {
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       try {
-        if (_googleAuth.idToken != null && _googleAuth.accessToken != null) {
+        if (googleAuth.idToken != null && googleAuth.accessToken != null) {
           UserCredential sonuc = await FirebaseAuth.instance
               .signInWithCredential(GoogleAuthProvider.credential(
-                  idToken: _googleAuth.idToken,
-                  accessToken: _googleAuth.accessToken));
+                  idToken: googleAuth.idToken,
+                  accessToken: googleAuth.accessToken));
           // ignore: unused_local_variable
-          User? _user = await sonuc.user;
+          User? user = sonuc.user;
           String a = "esnaf";
           await AuthService().checkUser();
           AuthService().isHaveProfile
               ? Navigator.of(context).pushAndRemoveUntil(
-                  CupertinoPageRoute(builder: (context) => MainScreen()),
+                  CupertinoPageRoute(builder: (context) => const MainScreen()),
                   ((route) => false))
               : Navigator.of(context).pushAndRemoveUntil(
                   CupertinoPageRoute(

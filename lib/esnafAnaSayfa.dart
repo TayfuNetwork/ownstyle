@@ -105,20 +105,22 @@ class _MainScreenState extends State<MainScreen> {
     if (a == "Bugün") {
       return randevuTarihi = DateTime.now();
     } else if (a == "Yarin") {
-      return randevuTarihi = DateTime.now().add(Duration(days: 1));
+      return randevuTarihi = DateTime.now().add(const Duration(days: 1));
     } else if (a == "2 gün sonra") {
-      return randevuTarihi = DateTime.now().add(Duration(days: 2));
+      return randevuTarihi = DateTime.now().add(const Duration(days: 2));
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(Duration(days: 3));
+      return randevuTarihi = DateTime.now().add(const Duration(days: 3));
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(Duration(days: 4));
+      return randevuTarihi = DateTime.now().add(const Duration(days: 4));
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(Duration(days: 5));
+      return randevuTarihi = DateTime.now().add(const Duration(days: 5));
     }
   }
 
-  var a;
-  var b;
+  // ignore: prefer_typing_uninitialized_variables
+  var a = 08;
+  // ignore: prefer_typing_uninitialized_variables
+  var b = 00;
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -232,7 +234,7 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      drawer: MyDrawer(),
+      drawer: const MyDrawer(),
       floatingActionButton: FloatingActionButton.large(
           backgroundColor: const Color.fromARGB(255, 106, 81, 203),
           onPressed: () {
@@ -365,6 +367,7 @@ class _MainScreenState extends State<MainScreen> {
                                     } else {
                                       if (manuelIsim != null &&
                                           manuelNo != null &&
+                                          // ignore: unnecessary_null_comparison
                                           saat != null) {
                                         AuthService()
                                             .user
@@ -457,7 +460,7 @@ class _MainScreenState extends State<MainScreen> {
       body: _selectedIndex == 0
           ? Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 //color: Colors.white,

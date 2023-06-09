@@ -6,16 +6,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ownstyle/esnafAnaSayfa.dart';
 import 'package:ownstyle/services/servisler.dart';
-import 'package:ownstyle/pages/sign_in_page.dart';
 import 'package:ownstyle/models/user_model.dart';
 
 import '../services/Auth_Service.dart';
 
 // ignore: camel_case_types
 
+// ignore: must_be_immutable
 class Profile extends StatefulWidget {
   String meslek;
   Profile({
@@ -24,10 +23,12 @@ class Profile extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProfileState createState() => _ProfileState();
 }
 
 String? ad;
+String? okundu = "hayir";
 
 class _ProfileState extends State<Profile> {
   MeslekServices model1 = MeslekServices();
@@ -63,7 +64,7 @@ class _ProfileState extends State<Profile> {
                 children: <Widget>[
                   const SizedBox(height: 10),
                   Text('Bilgilerinizi Giriniz'.tr(),
-                      style: TextStyle(color: Colors.yellow)),
+                      style: const TextStyle(color: Colors.yellow)),
 
                   /*************/ const SizedBox(height: 10),
                   TextField(
@@ -85,7 +86,7 @@ class _ProfileState extends State<Profile> {
                   ),
                   const SizedBox(height: 30),
                   widget.meslek != "esnaf"
-                      ? SizedBox()
+                      ? const SizedBox()
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -122,10 +123,50 @@ class _ProfileState extends State<Profile> {
                     children: [
                       if (isim != null || meslek != null)
                         ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (builder) => Stack(
+                                        children: [
+                                          AlertDialog(
+                                            content: const Card(
+                                              child: Text(
+                                                  "Uygulama çalışırken sizden arama geçmişinizi görmek ve varsayılan sms gönderme uygulamanıza yönlendirmek için izin isteyecektir. Bu izinler vasıtasıylsa sadece arama geçmişinizi size gösterebilir. Uygulama içi arama yapamaz, kişi ekleyemez, silemez ve uygulama içerisinden sms gönderimi yapamaz. Devam ederek bu izinlerin sizden istenmesini sağlayacaksınız. Reddetmeniz durumunda uygulama düzgün çalışmaz."),
+                                            ),
+                                            actions: <Widget>[
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  const Icon(Icons.cut),
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          okundu = "evet";
+                                                          Navigator.pop(
+                                                              context);
+                                                        });
+                                                      },
+                                                      child:
+                                                          const Text("Devam")),
+                                                  const Icon(Icons.cut)
+                                                ],
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      ));
+                            },
+                            child: const Text("Devam")),
+                      if (meslek != null && okundu == "evet")
+                        ElevatedButton(
                           // ignore: prefer_const_constructors
 
                           onPressed: () async {
-                            if (isim!.isNotEmpty && meslek != null) {
+                            if (isim!.isNotEmpty &&
+                                meslek != null &&
+                                okundu == "evet") {
                               setState(() {
                                 ad = isim!;
 
@@ -174,18 +215,19 @@ class _ProfileState extends State<Profile> {
                                 // ignore: curly_braces_in_flow_control_structures, use_build_context_synchronously
                                 await Navigator.of(context).push(
                                     CupertinoPageRoute(
-                                        builder: (context) => MainScreen()));
+                                        builder: (context) =>
+                                            const MainScreen()));
                               Navigator.of(context).pop();
                             } else {
                               Fluttertoast.showToast(
-                                msg: "BilgilerDogruMu".tr(),
+                                msg: "Bilgiler Hatalı".tr(),
                                 gravity: ToastGravity.BOTTOM,
                                 toastLength: Toast.LENGTH_LONG,
                               );
                             }
                           },
                           child: Text('Kaydet ve Devam Et'.tr(),
-                              style: TextStyle(color: Colors.white)),
+                              style: const TextStyle(color: Colors.white)),
                         )
                     ],
                   )

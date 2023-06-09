@@ -39,7 +39,7 @@ class NotificationService {
         FlutterLocalNotificationsPlugin();
     final DateTime date = zaman;
     final scheduledNotificationDateTime =
-        date.subtract( Duration(minutes: 20));
+        date.subtract(const Duration(minutes: 20));
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'your_channel_id', 'Scheduled Notification',
         importance: Importance.max, priority: Priority.high);
@@ -50,7 +50,7 @@ class NotificationService {
         .millisecondsSinceEpoch
         .remainder(100000); 
     await flutterLocalNotificationsPlugin.schedule(
-        payload: "$numara",
+        payload: numara,
         notificationId,
         'Sıradaki Randevunuz - $numara',
         'Sıradaki müşterinize randevusunu hatırlatın!',

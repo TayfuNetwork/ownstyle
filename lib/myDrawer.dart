@@ -1,4 +1,4 @@
-// ignore: file_names
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +11,7 @@ import 'package:ownstyle/models/user_model.dart';
 //import 'package:in_app_update/in_app_update.dart';
 
 class MyDrawer extends StatefulWidget {
-  MyDrawer({Key? key}) : super(key: key);
+  const MyDrawer({Key? key}) : super(key: key);
 
   @override
   State<MyDrawer> createState() => _MyDrawerState();
@@ -27,7 +27,7 @@ class _MyDrawerState extends State<MyDrawer> {
         child: Column(
           children: [
             UserAccountsDrawerHeader(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                       colors: <Color>[Colors.blue, Colors.blueAccent]),
                 ),
@@ -35,7 +35,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     style: const TextStyle(
                         fontSize: 20, fontStyle: FontStyle.italic)),
                 accountEmail: Text(user.mail!),
-                currentAccountPicture: CircleAvatar(
+                currentAccountPicture: const CircleAvatar(
                   radius: 95,
                   backgroundColor: Colors.white,
                 )),
@@ -46,7 +46,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       leading: const Icon(Icons.no_accounts),
                       title: Text(
                         "CikisYap".tr(),
-                        style: TextStyle(color: Colors.red, fontSize: 12),
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
                       ),
                       trailing: const Icon(Icons.keyboard_arrow_right),
                       onTap: () {
@@ -59,7 +59,7 @@ class _MyDrawerState extends State<MyDrawer> {
                                 title: Center(
                                   child: Text(
                                     "UygulamadanCikiliyor".tr(),
-                                    style: TextStyle(color: Colors.red),
+                                    style: const TextStyle(color: Colors.red),
                                   ),
                                 ),
                                 actions: <Widget>[
@@ -76,7 +76,7 @@ class _MyDrawerState extends State<MyDrawer> {
                                           child: Text(
                                             "CikisYap".tr(),
                                             style:
-                                                TextStyle(color: Colors.blue),
+                                                const TextStyle(color: Colors.blue),
                                           )),
                                       TextButton(
                                         onPressed: () {
@@ -84,7 +84,7 @@ class _MyDrawerState extends State<MyDrawer> {
                                         },
                                         child: Text("Vazgeç".tr(),
                                             style:
-                                                TextStyle(color: Colors.blue)),
+                                                const TextStyle(color: Colors.blue)),
                                       ),
                                     ],
                                   ),
@@ -97,11 +97,12 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
                   AboutListTile(
                     applicationName: "Lisans".tr(),
-                    applicationIcon: Icon(Icons.file_open),
+                    applicationIcon: const Icon(Icons.file_open),
                     applicationVersion: "3.8",
-                    child: Text("UygulamaHakkinda".tr(),
-                        style: TextStyle(fontSize: 12)),
-                    icon: Icon(Icons.info),
+                     // ignore: sort_child_properties_last
+                     child: Text("UygulamaHakkinda".tr(),
+                        style: const TextStyle(fontSize: 12)),
+                    icon: const Icon(Icons.info),
                     applicationLegalese: null,
                   )
                 ],
