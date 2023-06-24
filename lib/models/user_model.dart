@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ownstyle/models/randevu_model.dart';
 
 class MyUser {
+  
   String? mail;
   String? id;
   bool? musteri;

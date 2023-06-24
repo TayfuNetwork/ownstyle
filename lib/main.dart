@@ -1,14 +1,15 @@
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:ownstyle/services/Auth_Service.dart';
 import 'package:ownstyle/pages/landing_page.dart';
 
 import 'services/NotificationService.dart';
 
-//GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+ GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
-/*Future<void> checkForUpdate() async {
+Future<void> checkForUpdate() async {
   try {
     AppUpdateInfo info = await InAppUpdate.checkForUpdate();
     if (info.updateAvailability == UpdateAvailability.updateAvailable) {
@@ -23,11 +24,11 @@ import 'services/NotificationService.dart';
     ScaffoldMessenger.of(_scaffoldKey.currentContext!)
         .showSnackBar(SnackBar(content: Text("$e")));
   }
-}*/
+} 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //checkForUpdate();
+  checkForUpdate();
   await Firebase.initializeApp();
   await AuthService().checkUser();
   await NotificationService.init();

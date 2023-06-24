@@ -54,6 +54,7 @@ class _MainScreenState extends State<MainScreen> {
   String? manuelNo;
   String? manuelIsim;
   Iterable<CallLogEntry> _callLogEntries = [];
+  String? hangiGun = "Bugün";
 
   @override
   void initState() {
@@ -100,21 +101,32 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  String neZaman = "";
   DateTime? randevuTarihi;
   _selectDate(a) {
+    setState(() {
+      hangiGun = a;
+    });
     if (a == "Bugün") {
-      return randevuTarihi = DateTime.now();
+       randevuTarihi = DateTime.now();
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "Yarin") {
-      return randevuTarihi = DateTime.now().add(const Duration(days: 1));
+       randevuTarihi = DateTime.now().add(const Duration(days: 1));
+       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "2 gün sonra") {
-      return randevuTarihi = DateTime.now().add(const Duration(days: 2));
+       randevuTarihi = DateTime.now().add(const Duration(days: 2));
+       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(const Duration(days: 3));
+       randevuTarihi = DateTime.now().add(const Duration(days: 3));
+       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(const Duration(days: 4));
+       randevuTarihi = DateTime.now().add(const Duration(days: 4));
+       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-      return randevuTarihi = DateTime.now().add(const Duration(days: 5));
+       randevuTarihi = DateTime.now().add(const Duration(days: 5));
+       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     }
+  
   }
 
   // ignore: prefer_typing_uninitialized_variables
@@ -130,7 +142,7 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         saat = ('${pickedTime.hour}:${pickedTime.minute}');
         a = pickedTime.hour;
-        b = pickedTime.minute;
+        b = pickedTime.minute + 5;
       });
     }
   }
@@ -172,15 +184,18 @@ class _MainScreenState extends State<MainScreen> {
     120,
   ];
 
-  deleteManuelDataAtSpecificTime(t) {
-    DateTime now = DateTime.now();
-    DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
+  deleteManuelDataAtSpecificTime(t, String k) {
+    if (k == "Bugün") {
+      DateTime now = DateTime.now();
+      DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
 
-    Duration difference = targetTime.difference(now);
+      Duration difference = targetTime.difference(now);
 
-    Timer(difference, () => deleteManuelDate(t));
+      Timer(difference, () => deleteManuelDate(t));
+    } else {}
   }
 
+// görüşme esnasında açık kayıt tut
   deleteManuelDate(e) {
     FirebaseFirestore.instance
         .collection("Randevular")
@@ -386,7 +401,7 @@ class _MainScreenState extends State<MainScreen> {
                                             .set({
                                           "no": manuelNo.toString(),
                                           "dateDate": saat,
-                                          "dateYapilacak": yapilacak,
+                                          "dateYapilacak": neZaman,
                                           // ignore: unnecessary_null_in_if_null_operators
                                           "dateName": manuelIsim ?? null,
                                           "dateTarihi": randevuTarihi,
@@ -412,7 +427,7 @@ class _MainScreenState extends State<MainScreen> {
                                         Navigator.pop(context);
 
                                         deleteManuelDataAtSpecificTime(
-                                            manuelNo);
+                                            manuelNo, hangiGun!);
                                       } else {}
                                     }
                                   },
@@ -566,6 +581,35 @@ class _MainScreenState extends State<MainScreen> {
                                                               _selectTime(
                                                                   context);
                                                             }),
+                                                        const Text(
+                                                          "Tarih :",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue),
+                                                        ),
+                                                        DropdownButton(
+                                                          value:
+                                                              secilenRandevuTarihi,
+                                                          items: menuItems.map<
+                                                              DropdownMenuItem<
+                                                                  String>>((String
+                                                              b) {
+                                                            return DropdownMenuItem<
+                                                                String>(
+                                                              value: b,
+                                                              child: Text(b),
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  secilenRandevuTarihi =
+                                                                      b;
+                                                                  _selectDate(
+                                                                      b);
+                                                                });
+                                                              },
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (a) {},
+                                                        )
                                                       ],
                                                     ),
                                                     Row(
@@ -611,8 +655,8 @@ class _MainScreenState extends State<MainScreen> {
                                                           onPressed: () async {
                                                             List<String>? x =
                                                                 AuthService()
-                                                                        .user
-                                                                        ?.saatler ??
+                                                                        .user!
+                                                                        .saatler ??
                                                                     [];
                                                             if (x.contains(
                                                                 saat)) {
@@ -630,10 +674,11 @@ class _MainScreenState extends State<MainScreen> {
                                                             } else {
                                                               deleteManuelDataAtSpecificTime(
                                                                   callLogEntry
-                                                                      .number);
+                                                                      .number,
+                                                                  hangiGun!);
                                                               AuthService()
-                                                                  .user
-                                                                  ?.numaralar!
+                                                                  .user!
+                                                                  .numaralar!
                                                                   .add(callLogEntry
                                                                       .number!);
                                                               AuthService()
@@ -641,7 +686,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                   ?.saatler!
                                                                   .add(saat);
 
-                                                              AuthService()
+                                                              await AuthService()
                                                                   .updateUser(
                                                                       AuthService()
                                                                           .user!);
@@ -666,7 +711,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                 "dateDate":
                                                                     saat,
                                                                 "dateYapilacak":
-                                                                    yapilacak,
+                                                                    neZaman,
                                                                 "dateName":
                                                                     // ignore: unnecessary_null_in_if_null_operators
                                                                     callLogEntry
@@ -696,7 +741,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                   minute);
                                                               NotificationService()
                                                                   .randevuZamanla(
-                                                                      "$manuelNo",
+                                                                      "${callLogEntry.number}",
                                                                       sss);
                                                               // ignore: use_build_context_synchronously
                                                               await zamanEkle(
@@ -834,11 +879,35 @@ class _MainScreenState extends State<MainScreen> {
                                                                 _selectTime(
                                                                     context);
                                                               }),
-                                                          Text(
-                                                              " ${(e.dateDate)}",
-                                                              style: const TextStyle(
-                                                                  color: Colors
-                                                                      .grey))
+                                                          const Text(
+                                                            "Tarih :",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .blue),
+                                                          ),
+                                                          DropdownButton(
+                                                            value:
+                                                                secilenRandevuTarihi,
+                                                            items: menuItems.map<
+                                                                DropdownMenuItem<
+                                                                    String>>((String
+                                                                b) {
+                                                              return DropdownMenuItem<
+                                                                  String>(
+                                                                value: b,
+                                                                child: Text(b),
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    secilenRandevuTarihi =
+                                                                        b;
+                                                                    _selectDate(
+                                                                        b);
+                                                                  });
+                                                                },
+                                                              );
+                                                            }).toList(),
+                                                            onChanged: (a) {},
+                                                          )
                                                         ],
                                                       ),
                                                       Row(
@@ -915,7 +984,8 @@ class _MainScreenState extends State<MainScreen> {
                                                                     ?.saatler!
                                                                     .add(saat);
                                                                 deleteManuelDataAtSpecificTime(
-                                                                    e.no);
+                                                                    e.no,
+                                                                    hangiGun!);
                                                                 // ignore: use_build_context_synchronously
                                                                 Navigator.pop(
                                                                     context);
@@ -934,7 +1004,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                   "dateDate": saat
                                                                       .toString(),
                                                                   "dateYapilacak":
-                                                                      yapilacak,
+                                                                      neZaman,
                                                                   "dateName":
                                                                       // ignore: unnecessary_null_in_if_null_operators
                                                                       e.dateName ??
@@ -965,7 +1035,7 @@ class _MainScreenState extends State<MainScreen> {
                                                                     minute);
                                                                 NotificationService()
                                                                     .randevuZamanla(
-                                                                        "$manuelNo",
+                                                                        "${e.no}",
                                                                         sss);
                                                                 // ignore: use_build_context_synchronously
                                                                 await zamanEkle(
