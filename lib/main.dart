@@ -7,7 +7,7 @@ import 'package:ownstyle/pages/landing_page.dart';
 
 import 'services/NotificationService.dart';
 
- GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
 Future<void> checkForUpdate() async {
   try {
@@ -24,11 +24,11 @@ Future<void> checkForUpdate() async {
     ScaffoldMessenger.of(_scaffoldKey.currentContext!)
         .showSnackBar(SnackBar(content: Text("$e")));
   }
-} 
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  checkForUpdate();
+  //checkForUpdate();
   await Firebase.initializeApp();
   await AuthService().checkUser();
   await NotificationService.init();

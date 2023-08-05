@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ownstyle/models/randevu_model.dart';
 
 class MyUser {
-  
+  String? taslakmesaj = "Randevu";
   String? mail;
   String? id;
   bool? musteri;
@@ -24,6 +24,7 @@ class MyUser {
   List<String>? numaralar = [];
   List<String>? saatler = [];
   MyUser({
+    this.taslakmesaj = "Randevu",
     this.saatler,
     this.mail,
     this.id,
@@ -43,6 +44,7 @@ class MyUser {
   });
 
   MyUser copyWith({
+    String? taslakmesaj,
     String? mail,
     String? id,
     bool? musteri,
@@ -61,6 +63,7 @@ class MyUser {
     List<String>? saatler,
   }) {
     return MyUser(
+      taslakmesaj: taslakmesaj ?? this.taslakmesaj,
       saatler: saatler ?? this.saatler,
       mail: mail ?? this.mail,
       id: id ?? this.id,
@@ -82,6 +85,7 @@ class MyUser {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'taslakmesaj': taslakmesaj,
       'saatler': saatler,
       'mail': mail,
       'id': id,
@@ -103,6 +107,8 @@ class MyUser {
 
   factory MyUser.fromMap(Map<String, dynamic> map) {
     return MyUser(
+      taslakmesaj:
+          map['taslakmesaj'] != null ? map['taslakmesaj'] as String : null,
       mail: map['mail'] != null ? map['mail'] as String : null,
       id: map['id'] != null ? map['id'] as String : null,
       musteri: map['musteri'] != null ? map['musteri'] as bool : null,
@@ -140,7 +146,7 @@ class MyUser {
 
   @override
   String toString() {
-    return 'MyUser(saatler: $saatler, mail: $mail, id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token, randevu: $randevu, dateName: $dateName, dateDate: $dateDate, dateNo: $dateNo, dateId: $dateId, dateYapilacak: $dateYapilacak, numaralar: $numaralar)';
+    return 'MyUser(taslakmesaj: $taslakmesaj, saatler: $saatler, mail: $mail, id: $id, musteri: $musteri, abone: $abone, meslek: $meslek, isim: $isim, no: $no, token: $token, randevu: $randevu, dateName: $dateName, dateDate: $dateDate, dateNo: $dateNo, dateId: $dateId, dateYapilacak: $dateYapilacak, numaralar: $numaralar)';
   }
 
   @override
@@ -152,6 +158,7 @@ class MyUser {
         other.musteri == musteri &&
         other.abone == abone &&
         other.meslek == meslek &&
+        other.taslakmesaj == taslakmesaj &&
         other.isim == isim &&
         other.no == no &&
         other.token == token &&
@@ -169,6 +176,7 @@ class MyUser {
   int get hashCode {
     return mail.hashCode ^
         id.hashCode ^
+        taslakmesaj.hashCode ^
         musteri.hashCode ^
         abone.hashCode ^
         meslek.hashCode ^

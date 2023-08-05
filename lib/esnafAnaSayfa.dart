@@ -55,11 +55,14 @@ class _MainScreenState extends State<MainScreen> {
   String? manuelIsim;
   Iterable<CallLogEntry> _callLogEntries = [];
   String? hangiGun = "Bugün";
+  String? mesaj = AuthService().user!.taslakmesaj;
+  TextEditingController? _mesajController;
 
   @override
   void initState() {
     super.initState();
     setState(() {
+      _mesajController = TextEditingController();
       AuthService().checkUser;
     });
     _getCallLog();
@@ -108,25 +111,24 @@ class _MainScreenState extends State<MainScreen> {
       hangiGun = a;
     });
     if (a == "Bugün") {
-       randevuTarihi = DateTime.now();
+      randevuTarihi = DateTime.now();
       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "Yarin") {
-       randevuTarihi = DateTime.now().add(const Duration(days: 1));
-       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
+      randevuTarihi = DateTime.now().add(const Duration(days: 1));
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "2 gün sonra") {
-       randevuTarihi = DateTime.now().add(const Duration(days: 2));
-       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
+      randevuTarihi = DateTime.now().add(const Duration(days: 2));
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-       randevuTarihi = DateTime.now().add(const Duration(days: 3));
-       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
+      randevuTarihi = DateTime.now().add(const Duration(days: 3));
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-       randevuTarihi = DateTime.now().add(const Duration(days: 4));
-       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
+      randevuTarihi = DateTime.now().add(const Duration(days: 4));
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     } else if (a == "3 gün sonra") {
-       randevuTarihi = DateTime.now().add(const Duration(days: 5));
-       neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
+      randevuTarihi = DateTime.now().add(const Duration(days: 5));
+      neZaman = DateFormat('dd-MM-yyyy').format(randevuTarihi!);
     }
-  
   }
 
   // ignore: prefer_typing_uninitialized_variables
@@ -142,7 +144,7 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         saat = ('${pickedTime.hour}:${pickedTime.minute}');
         a = pickedTime.hour;
-        b = pickedTime.minute + 5;
+        b = pickedTime.minute + 10; // kaç dakika sonra randevu silinsin bölümü.
       });
     }
   }
@@ -184,19 +186,19 @@ class _MainScreenState extends State<MainScreen> {
     120,
   ];
 
-  deleteManuelDataAtSpecificTime(t, String k) {
+  deleteManuelDataAtSpecificTime(t, String k, ssaat) {
     if (k == "Bugün") {
       DateTime now = DateTime.now();
       DateTime targetTime = DateTime(now.year, now.month, now.day, a, b);
 
       Duration difference = targetTime.difference(now);
 
-      Timer(difference, () => deleteManuelDate(t));
+      Timer(difference, () => deleteManuelDate(t, ssaat));
     } else {}
   }
 
 // görüşme esnasında açık kayıt tut
-  deleteManuelDate(e) {
+  deleteManuelDate(e, ssaat) async {
     FirebaseFirestore.instance
         .collection("Randevular")
         .doc("${AuthService().user!.id}")
@@ -204,7 +206,9 @@ class _MainScreenState extends State<MainScreen> {
         .doc(e)
         .delete();
     AuthService().user!.numaralar!.removeWhere((element) => element == e);
-    AuthService().user!.saatler!.removeWhere((element) => element == saat);
+    AuthService().updateUser(AuthService().user!);
+
+    AuthService().user!.saatler!.removeWhere((element) => element == ssaat);
     AuthService().updateUser(AuthService().user!);
   }
 
@@ -229,6 +233,7 @@ class _MainScreenState extends State<MainScreen> {
   String yapilacak = "";
   @override
   Widget build(BuildContext context) {
+    String? mesaj = AuthService().user!.taslakmesaj;
     String? isim = AuthService().user!.isim;
     return SafeArea(
         child: Scaffold(
@@ -427,7 +432,7 @@ class _MainScreenState extends State<MainScreen> {
                                         Navigator.pop(context);
 
                                         deleteManuelDataAtSpecificTime(
-                                            manuelNo, hangiGun!);
+                                            manuelNo, hangiGun!, saat);
                                       } else {}
                                     }
                                   },
@@ -449,10 +454,61 @@ class _MainScreenState extends State<MainScreen> {
           child: const Icon(Icons.add_alarm)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       appBar: AppBar(
-        actions: const [
-          Icon(
-            Icons.online_prediction,
-            color: Colors.blue,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            color: Colors.white,
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Center(
+                        child: Text("Mesaj Değiştir"),
+                      ),
+                      content: Container(
+                        child: TextFormField(
+                          maxLines: 2,
+                          controller: _mesajController,
+                          readOnly: false,
+                          decoration: InputDecoration(
+                              labelText: 'örnek mesaj'.tr(),
+                              hintText: 'örnek mesaj'.tr(),
+                              border: OutlineInputBorder()),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () async {
+                              final _userModel = AuthService();
+                              var userID = AuthService().user!.id;
+                              await FirebaseFirestore.instance
+                                  .collection("Users")
+                                  .doc(userID)
+                                  .update(
+                                      {'taslakMesaj': _mesajController!.text});
+
+                              _userModel.user!.taslakmesaj =
+                                  _mesajController!.text; //auth servisdeki user
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      backgroundColor: Colors.blue,
+                                      content: Text(
+                                          "Taslak mesaj değiştire başarılı"
+                                              .tr(),
+                                          style:
+                                              TextStyle(color: Colors.white))));
+                              Navigator.pop(context);
+                            },
+                            child: Center(
+                              child: Text("Değiştir".tr(),
+                                  style: TextStyle(fontSize: 18)),
+                            ))
+                      ],
+                    );
+                  });
+            },
           )
         ],
         toolbarHeight: 70,
@@ -675,7 +731,8 @@ class _MainScreenState extends State<MainScreen> {
                                                               deleteManuelDataAtSpecificTime(
                                                                   callLogEntry
                                                                       .number,
-                                                                  hangiGun!);
+                                                                  hangiGun!,
+                                                                  saat);
                                                               AuthService()
                                                                   .user!
                                                                   .numaralar!
@@ -816,9 +873,7 @@ class _MainScreenState extends State<MainScreen> {
                                       leading: GestureDetector(
                                           onTap: () {
                                             launchSms(
-                                                message:
-                                                    "Sevgili ${e.dateName ?? 'Müşterimiz'}; ${AuthService().user!.isim} de ki randevunuzun yaklaştığını hatırlatmak isteriz. Bizi tercih ettiğiniz için teşekkür eder memnuniyet dileriz.",
-                                                number: e.no);
+                                                message: mesaj, number: e.no);
                                           },
                                           child: const CircleAvatar(
                                             // ignore: sort_child_properties_last
@@ -985,7 +1040,8 @@ class _MainScreenState extends State<MainScreen> {
                                                                     .add(saat);
                                                                 deleteManuelDataAtSpecificTime(
                                                                     e.no,
-                                                                    hangiGun!);
+                                                                    hangiGun!,
+                                                                    saat);
                                                                 // ignore: use_build_context_synchronously
                                                                 Navigator.pop(
                                                                     context);

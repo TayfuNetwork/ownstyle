@@ -200,6 +200,7 @@ class _ProfileState extends State<Profile> {
                               await AuthService().updateUser(myUser);
 
                               myUser = MyUser(
+                                  taslakmesaj: "Radevu",
                                   saatler: [],
                                   abone: false,
                                   mail: user.email,
