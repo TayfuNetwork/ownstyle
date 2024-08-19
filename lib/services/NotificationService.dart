@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -34,10 +35,10 @@ class NotificationService {
         payload: 'Custom_Sound');
   }
 
-  randevuZamanla(String numara, DateTime zaman) async {
+  randevuZamanla(String numara, TZDateTime zaman) async {
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
-    final DateTime date = zaman;
+    final TZDateTime date = zaman;
     final scheduledNotificationDateTime =
         date.subtract(const Duration(minutes: 20));
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -49,13 +50,14 @@ class NotificationService {
     int notificationId = DateTime.now()
         .millisecondsSinceEpoch
         .remainder(100000); 
-    await flutterLocalNotificationsPlugin.schedule(
+    await flutterLocalNotificationsPlugin.zonedSchedule(
         payload: numara,
         notificationId,
         'Sıradaki Randevunuz - $numara',
         'Sıradaki müşterinize randevusunu hatırlatın!',
         scheduledNotificationDateTime,
-        platformChannelSpecifics);
+        platformChannelSpecifics, 
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime);
   }
 }
 

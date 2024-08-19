@@ -28,6 +28,7 @@ Future<void> checkForUpdate() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   //checkForUpdate();
   await Firebase.initializeApp();
   await AuthService().checkUser();

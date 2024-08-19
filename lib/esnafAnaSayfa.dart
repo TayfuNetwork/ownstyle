@@ -14,6 +14,8 @@ import 'package:ownstyle/services/search_service.dart';
 import 'package:ownstyle/models/user_model.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:flutter_sms/flutter_sms.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({
@@ -24,26 +26,36 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-void randevuZamanla(String mesaj, String numara, int zaman, String name) async {
+Future<void> scheduleNotification(int zaman, name, mesaj, numara) async {
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
+  final scheduledNotificationDateTime =
+      tz.TZDateTime.now(tz.local).add(Duration(minutes: zaman));
+  const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    'your_channel_id',
+    'OwnStlye',
+    channelDescription: 'Randevu Hatırlatıcı',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  final scheduledNotificationDateTime =
-      DateTime.now().add(Duration(minutes: zaman));
-  const androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'your_channel_id', 'Scheduled Notification',
-      importance: Importance.max, priority: Priority.high);
   const platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
 
-  // ignore: deprecated_member_use
-  await flutterLocalNotificationsPlugin.schedule(
-      payload: "$mesaj,$numara",
-      0,
-      'Sıradaki Randevu',
-      "$name'a randevusunu hatırlatın !",
-      scheduledNotificationDateTime,
-      platformChannelSpecifics);
+  // Bildirimi zamanla
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    payload: "$mesaj,$numara",
+    0,
+    'Sıradaki Randevu',
+    "$name'a randevusunu hatırlatın !",
+    scheduledNotificationDateTime,
+    platformChannelSpecifics,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    androidAllowWhileIdle: true,
+    // Additional parameters can be set here if needed
+  );
 }
 
 int _selectedIndex = 0;
@@ -70,18 +82,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void setStream() {
-    PhoneState.phoneStateStream.listen((event) {
-      switch (event) {
-        case PhoneStateStatus.CALL_ENDED:
-        case PhoneStateStatus.NOTHING:
-          setState(() {
-            Future.delayed(const Duration(seconds: 3), _getCallLog);
-          });
-          break;
-        case PhoneStateStatus.CALL_INCOMING:
-          break;
-        case PhoneStateStatus.CALL_STARTED:
-          break;
+    PhoneState.stream.listen((status) {
+      // ignore: unrelated_type_equality_checks
+      if (status == PhoneStateStatus.CALL_ENDED) {
+        Future.delayed(const Duration(seconds: 1), _getCallLog);
       }
     });
   }
@@ -417,14 +421,17 @@ class _MainScreenState extends State<MainScreen> {
                                             saat.split(":");
                                         int hour = int.parse(timeParts[0]);
                                         int minute = int.parse(timeParts[1]);
-                                        DateTime sss = DateTime(
+                                        DateTime bildirimsaati = DateTime(
                                             DateTime.now().year,
                                             DateTime.now().month,
                                             DateTime.now().day,
                                             hour,
                                             minute);
-                                        NotificationService()
-                                            .randevuZamanla("$manuelNo", sss);
+                                        tz.TZDateTime tzbildirimsaati =
+                                            tz.TZDateTime.from(
+                                                bildirimsaati, tz.local);
+                                        NotificationService().randevuZamanla(
+                                            "$manuelNo", tzbildirimsaati);
                                         // ignore: use_build_context_synchronously
                                         await zamanEkle(context, degiskenZaman,
                                             todcevir(saat));
@@ -796,10 +803,15 @@ class _MainScreenState extends State<MainScreen> {
                                                                       .day,
                                                                   hour,
                                                                   minute);
+                                                              tz.TZDateTime
+                                                                  tzbildirimsaati =
+                                                                  tz.TZDateTime
+                                                                      .from(sss,
+                                                                          tz.local);
                                                               NotificationService()
                                                                   .randevuZamanla(
                                                                       "${callLogEntry.number}",
-                                                                      sss);
+                                                                      tzbildirimsaati);
                                                               // ignore: use_build_context_synchronously
                                                               await zamanEkle(
                                                                   context,
@@ -1089,10 +1101,16 @@ class _MainScreenState extends State<MainScreen> {
                                                                         .day,
                                                                     hour,
                                                                     minute);
+                                                                tz.TZDateTime
+                                                                    tzbildirimsaati =
+                                                                    tz.TZDateTime
+                                                                        .from(
+                                                                            sss,
+                                                                            tz.local);
                                                                 NotificationService()
                                                                     .randevuZamanla(
                                                                         "${e.no}",
-                                                                        sss);
+                                                                        tzbildirimsaati);
                                                                 // ignore: use_build_context_synchronously
                                                                 await zamanEkle(
                                                                     context,
